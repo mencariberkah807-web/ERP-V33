@@ -1,0 +1,130 @@
+/* =========================
+   Layout
+========================= */
+
+.erp-container {
+    width: 100%;
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: var(--space-4);
+}
+
+
+.erp-flex {
+    display: flex;
+}
+
+
+.erp-flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.erp-items-center {
+    align-items: center;
+}
+
+
+.erp-justify-between {
+    justify-content: space-between;
+}
+
+
+.erp-grid {
+    display: grid;
+}
+
+
+.erp-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+
+.erp-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+
+/* =========================
+   Spacing
+========================= */
+
+.erp-gap-1 {
+    gap: var(--space-1);
+}
+
+
+.erp-gap-2 {
+    gap: var(--space-2);
+}
+
+
+.erp-gap-3 {
+    gap: var(--space-3);
+}
+
+
+.erp-gap-4 {
+    gap: var(--space-4);
+}
+
+
+.erp-mt-3 {
+    margin-top: var(--space-3);
+}
+
+
+.erp-mt-4 {
+    margin-top: var(--space-4);
+}
+
+
+.erp-mb-3 {
+    margin-bottom: var(--space-3);
+}
+
+
+/* =========================
+   Text
+========================= */
+
+.erp-text-muted {
+    color: var(--erp-text-muted);
+}
+
+
+.erp-text-sm {
+    font-size: var(--text-sm);
+}
+
+
+.erp-text-xs {
+    font-size: var(--text-xs);
+}
+
+
+.erp-font-medium {
+    font-weight: var(--weight-medium);
+}
+
+
+.erp-font-semibold {
+    font-weight: var(--weight-semibold);
+}
+
+
+/* =========================
+   Responsive
+========================= */
+
+@media (max-width: 768px) {
+
+    .erp-grid-2,
+    .erp-grid-3 {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}

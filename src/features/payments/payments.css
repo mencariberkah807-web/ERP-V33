@@ -1,0 +1,218 @@
+.payment-page {
+    min-height: 100%;
+    padding: var(--space-5);
+    background: var(--color-bg);
+}
+
+.payment-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: var(--space-5);
+}
+
+.payment-page-title {
+    margin: 0;
+    color: var(--color-text);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+}
+
+.payment-page-description {
+    margin: 4px 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+}
+
+/* LIST CARD */
+
+.payment-list-card {
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+}
+
+/* TOOLBAR */
+
+.payment-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.payment-search-wrap {
+    flex: 1;
+    max-width: 460px;
+}
+
+.payment-search-input,
+.payment-filter-select {
+    min-height: 40px;
+    border: 1px solid #dbe3ee;
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--font-size-sm);
+    outline: none;
+    transition:
+        border-color .16s ease,
+        box-shadow .16s ease;
+}
+
+.payment-search-input {
+    width: 100%;
+    padding: 0 12px;
+}
+
+.payment-filter-select {
+    width: 190px;
+    padding: 0 12px;
+}
+
+.payment-search-input:focus,
+.payment-filter-select:focus {
+    border-color: #7dd3fc;
+    box-shadow:
+        0 0 0 3px rgba(14, 165, 233, .10);
+}
+
+/* TABLE */
+
+.payment-table-wrap {
+    overflow-x: auto;
+}
+
+.payment-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+}
+
+.payment-table th {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-muted);
+    color: var(--color-text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.payment-table td {
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+.payment-table-row {
+    transition: background .15s ease;
+}
+
+.payment-table-row:hover {
+    background: #f8fbff;
+}
+
+.payment-table-number {
+    text-align: right !important;
+}
+
+.payment-number {
+    color: #17375f;
+    font-weight: 600;
+}
+
+.payment-amount {
+    color: #1e293b;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* SOURCE BADGES */
+
+.payment-source {
+    display: inline-flex;
+    min-height: 24px;
+    align-items: center;
+    padding: 0 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.payment-source--manual {
+    background: #f0f9ff;
+    color: #0369a1;
+}
+
+.payment-source--marketplace {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+/* EMPTY */
+
+.payment-empty-state {
+    height: 300px;
+    text-align: center;
+}
+
+.payment-empty-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 5px;
+    color: #64748b;
+}
+
+.payment-empty-content strong {
+    margin-top: 4px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.payment-empty-content span {
+    max-width: 280px;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.payment-empty-icon {
+    display: flex;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+    background: #f0f9ff;
+    color: #0369a1;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+@media (max-width: 720px) {
+    .payment-page {
+        padding: var(--space-4);
+    }
+
+    .payment-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .payment-search-wrap,
+    .payment-filter-select {
+        width: 100%;
+        max-width: none;
+    }
+}

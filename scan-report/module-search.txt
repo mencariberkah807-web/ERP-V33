@@ -1,0 +1,736 @@
+src/app/AppShell.jsx:import SalesOrderPage from "../features/sales-orders/SalesOrderPage.jsx";
+src/app/AppShell.jsx:import CustomerPage from "../features/customers/CustomerPage.jsx";
+src/app/AppShell.jsx:import ProductPage from "../features/products/ProductPage.jsx";
+src/app/AppShell.jsx:import PaymentPage from "../features/payments/PaymentPage.jsx";
+src/app/AppShell.jsx:  const isSalesOrder =
+src/app/AppShell.jsx:  const isPayment =
+src/app/AppShell.jsx:  const isCustomer =
+src/app/AppShell.jsx:  const isProduct =
+src/app/AppShell.jsx:          {isSalesOrder && (
+src/app/AppShell.jsx:            <SalesOrderPage
+src/app/AppShell.jsx:          {isPayment && (
+src/app/AppShell.jsx:            <PaymentPage />
+src/app/AppShell.jsx:          {isCustomer && (
+src/app/AppShell.jsx:            <CustomerPage />
+src/app/AppShell.jsx:          {isProduct && (
+src/app/AppShell.jsx:            <ProductPage />
+src/features/customers/CustomerPage.jsx:function createEmptyCustomerForm() {
+src/features/customers/CustomerPage.jsx:  const cleanCustomerName =
+src/features/customers/CustomerPage.jsx:  if (!cleanCustomerName) {
+src/features/customers/CustomerPage.jsx:    return cleanCustomerName;
+src/features/customers/CustomerPage.jsx:  return `${cleanCustomerName} - ${cleanCompany}`;
+src/features/customers/CustomerPage.jsx:function generateCustomerId(customers) {
+src/features/customers/CustomerPage.jsx:export default function CustomerPage() {
+src/features/customers/CustomerPage.jsx:  const [customers, setCustomers] =
+src/features/customers/CustomerPage.jsx:      customerStore.getCustomers()
+src/features/customers/CustomerPage.jsx:    selectedCustomerId,
+src/features/customers/CustomerPage.jsx:    setSelectedCustomerId,
+src/features/customers/CustomerPage.jsx:    useState(createEmptyCustomerForm);
+src/features/customers/CustomerPage.jsx:    useState(createEmptyCustomerForm);
+src/features/customers/CustomerPage.jsx:    setCustomerTypeFilter,
+src/features/customers/CustomerPage.jsx:  const selectedCustomer =
+src/features/customers/CustomerPage.jsx:        selectedCustomerId
+src/features/customers/CustomerPage.jsx:  const filteredCustomers =
+src/features/customers/CustomerPage.jsx:    setSelectedCustomerId(null);
+src/features/customers/CustomerPage.jsx:  function openNewCustomer() {
+src/features/customers/CustomerPage.jsx:    setSelectedCustomerId(null);
+src/features/customers/CustomerPage.jsx:      createEmptyCustomerForm()
+src/features/customers/CustomerPage.jsx:  function openCustomerDetail(
+src/features/customers/CustomerPage.jsx:    setSelectedCustomerId(
+src/features/customers/CustomerPage.jsx:    if (!selectedCustomer) {
+src/features/customers/CustomerPage.jsx:        selectedCustomer
+src/features/customers/CustomerPage.jsx:    if (!selectedCustomer) {
+src/features/customers/CustomerPage.jsx:        selectedCustomer
+src/features/customers/CustomerPage.jsx:  function validateCustomer(
+src/features/customers/CustomerPage.jsx:    excludedCustomerId = null
+src/features/customers/CustomerPage.jsx:      return "Customer Name is required.";
+src/features/customers/CustomerPage.jsx:      return "Please select Customer Type.";
+src/features/customers/CustomerPage.jsx:            excludedCustomerId &&
+src/features/customers/CustomerPage.jsx:  function buildCustomerRecord(
+src/features/customers/CustomerPage.jsx:  function handleCreateCustomer(
+src/features/customers/CustomerPage.jsx:      validateCustomer(formData);
+src/features/customers/CustomerPage.jsx:    const newCustomer =
+src/features/customers/CustomerPage.jsx:      buildCustomerRecord(
+src/features/customers/CustomerPage.jsx:        generateCustomerId(
+src/features/customers/CustomerPage.jsx:    const nextCustomers = [
+src/features/customers/CustomerPage.jsx:      newCustomer,
+src/features/customers/CustomerPage.jsx:    customerStore.replaceCustomers(
+src/features/customers/CustomerPage.jsx:      nextCustomers
+src/features/customers/CustomerPage.jsx:    setCustomers(nextCustomers);
+src/features/customers/CustomerPage.jsx:  function handleUpdateCustomer(
+src/features/customers/CustomerPage.jsx:    if (!selectedCustomer) {
+src/features/customers/CustomerPage.jsx:      validateCustomer(
+src/features/customers/CustomerPage.jsx:        selectedCustomer.customerId
+src/features/customers/CustomerPage.jsx:    const updatedCustomer =
+src/features/customers/CustomerPage.jsx:      buildCustomerRecord(
+src/features/customers/CustomerPage.jsx:        selectedCustomer.customerId,
+src/features/customers/CustomerPage.jsx:        selectedCustomer.status
+src/features/customers/CustomerPage.jsx:    const nextCustomers =
+src/features/customers/CustomerPage.jsx:          selectedCustomer.customerId
+src/features/customers/CustomerPage.jsx:            ? updatedCustomer
+src/features/customers/CustomerPage.jsx:    customerStore.replaceCustomers(
+src/features/customers/CustomerPage.jsx:      nextCustomers
+src/features/customers/CustomerPage.jsx:    setCustomers(nextCustomers);
+src/features/customers/CustomerPage.jsx:    if (!selectedCustomer) {
+src/features/customers/CustomerPage.jsx:      selectedCustomer.status ===
+src/features/customers/CustomerPage.jsx:        `Set ${selectedCustomer.displayName} to ${nextStatus}?`
+src/features/customers/CustomerPage.jsx:    const nextCustomers =
+src/features/customers/CustomerPage.jsx:          selectedCustomer.customerId
+src/features/customers/CustomerPage.jsx:    customerStore.replaceCustomers(
+src/features/customers/CustomerPage.jsx:      nextCustomers
+src/features/customers/CustomerPage.jsx:    setCustomers(nextCustomers);
+src/features/customers/CustomerPage.jsx:            Customers
+src/features/customers/CustomerPage.jsx:            used by Sales Orders.
+src/features/customers/CustomerPage.jsx:          onClick={openNewCustomer}
+src/features/customers/CustomerPage.jsx:          + New Customer
+src/features/customers/CustomerPage.jsx:              setCustomerTypeFilter(
+src/features/customers/CustomerPage.jsx:              All Customer Types
+src/features/customers/CustomerPage.jsx:                <th>Customer ID</th>
+src/features/customers/CustomerPage.jsx:                <th>Customer Name</th>
+src/features/customers/CustomerPage.jsx:                <th>Customer Type</th>
+src/features/customers/CustomerPage.jsx:              {filteredCustomers.length ===
+src/features/customers/CustomerPage.jsx:                filteredCustomers.map(
+src/features/customers/CustomerPage.jsx:                        openCustomerDetail(
+src/features/customers/CustomerPage.jsx:            aria-label="Close Customer Drawer"
+src/features/customers/CustomerPage.jsx:                    ? "New Customer"
+src/features/customers/CustomerPage.jsx:                    ? "Edit Customer"
+src/features/customers/CustomerPage.jsx:                    : "Customer Detail"}
+src/features/customers/CustomerPage.jsx:                    ? "Create Customer"
+src/features/customers/CustomerPage.jsx:                    : selectedCustomer?.displayName}
+src/features/customers/CustomerPage.jsx:                    ? "Customer ID generated automatically"
+src/features/customers/CustomerPage.jsx:                    : selectedCustomer?.customerId}
+src/features/customers/CustomerPage.jsx:                  <CustomerDetail
+src/features/customers/CustomerPage.jsx:                      selectedCustomer
+src/features/customers/CustomerPage.jsx:                      {selectedCustomer?.status ===
+src/features/customers/CustomerPage.jsx:                    ? handleCreateCustomer
+src/features/customers/CustomerPage.jsx:                    : handleUpdateCustomer
+src/features/customers/CustomerPage.jsx:                <CustomerTabs
+src/features/customers/CustomerPage.jsx:                      <CustomerInformationFields
+src/features/customers/CustomerPage.jsx:                            ? selectedCustomer
+src/features/customers/CustomerPage.jsx:                      <CustomerPhotoField
+src/features/customers/CustomerPage.jsx:                        ? "Create Customer"
+src/features/customers/CustomerPage.jsx:                        : "Update Customer"}
+src/features/customers/CustomerPage.jsx:function CustomerTabs({
+src/features/customers/CustomerPage.jsx:function CustomerInformationFields({
+src/features/customers/CustomerPage.jsx:          <span>Customer ID</span>
+src/features/customers/CustomerPage.jsx:          Customer Name *
+src/features/customers/CustomerPage.jsx:          Customer Type *
+src/features/customers/CustomerPage.jsx:            Select Customer Type
+src/features/customers/CustomerPage.jsx:          placeholder="Customer address"
+src/features/customers/CustomerPage.jsx:function CustomerPhotoField({
+src/features/customers/CustomerPage.jsx:        <h3>Customer Photo</h3>
+src/features/customers/CustomerPage.jsx:          this Customer Master record.
+src/features/customers/CustomerPage.jsx:            alt="Customer preview"
+src/features/customers/CustomerPage.jsx:            ? "Change Customer Photo"
+src/features/customers/CustomerPage.jsx:            : "Choose Customer Photo"}
+src/features/customers/CustomerPage.jsx:function CustomerDetail({
+src/features/customers/CustomerPage.jsx:            label="Customer ID"
+src/features/customers/CustomerPage.jsx:            label="Customer Name"
+src/features/customers/CustomerPage.jsx:            label="Customer Type"
+src/features/customers/components/CustomerForm.jsx:export function createEmptyCustomerForm() {
+src/features/customers/components/CustomerForm.jsx:export function buildCustomerDisplayName(customerName, company) {
+src/features/customers/components/CustomerForm.jsx:  const cleanCustomerName = customerName.trim();
+src/features/customers/components/CustomerForm.jsx:  if (!cleanCustomerName) {
+src/features/customers/components/CustomerForm.jsx:    return cleanCustomerName;
+src/features/customers/components/CustomerForm.jsx:  return `${cleanCustomerName} - ${cleanCompany}`;
+src/features/customers/components/CustomerForm.jsx:export default function CustomerForm({
+src/features/customers/components/CustomerForm.jsx:  const displayName = buildCustomerDisplayName(data.customerName, data.company);
+src/features/customers/components/CustomerForm.jsx:          <span>Customer ID</span>
+src/features/customers/components/CustomerForm.jsx:        <span>Customer Name *</span>
+src/features/customers/components/CustomerForm.jsx:        <span>Customer Type *</span>
+src/features/customers/components/CustomerForm.jsx:          <option value="">Select Customer Type</option>
+src/features/customers/components/CustomerForm.jsx:          placeholder="Customer address"
+src/features/customers/components/CustomerDetail.jsx:export default function CustomerDetail() {
+src/features/customers/components/CustomerDetail.jsx:  return <div>CustomerDetail</div>;
+src/features/customers/components/CustomerList.jsx:export default function CustomerList() {
+src/features/customers/components/CustomerList.jsx:  return <div>CustomerList</div>;
+src/features/payments/PaymentPage.jsx:function formatPaymentDate(value) {
+src/features/payments/PaymentPage.jsx:export default function PaymentPage() {
+src/features/payments/PaymentPage.jsx:    () => paymentStore.getPayments()
+src/features/payments/PaymentPage.jsx:  const filteredPayments =
+src/features/payments/PaymentPage.jsx:            Payments
+src/features/payments/PaymentPage.jsx:            linked to Sales Orders.
+src/features/payments/PaymentPage.jsx:                  Payment Date
+src/features/payments/PaymentPage.jsx:                  Payment No.
+src/features/payments/PaymentPage.jsx:                  Customer
+src/features/payments/PaymentPage.jsx:              {filteredPayments.length ===
+src/features/payments/PaymentPage.jsx:                        Payments created
+src/features/payments/PaymentPage.jsx:                        from Sales Orders
+src/features/payments/PaymentPage.jsx:                filteredPayments.map(
+src/features/payments/PaymentPage.jsx:                        {formatPaymentDate(
+src/features/payments/PaymentPage.jsx:                        <PaymentSourceBadge
+src/features/payments/PaymentPage.jsx:function PaymentSourceBadge({
+src/features/payments/components/PaymentSummary.jsx:export default function PaymentSummary() {
+src/features/payments/components/PaymentSummary.jsx:  return <div>PaymentSummary</div>;
+src/features/payments/components/PaymentHistory.jsx:export default function PaymentHistory() {
+src/features/payments/components/PaymentHistory.jsx:  return <div>PaymentHistory</div>;
+src/features/payments/components/PaymentForm.jsx:export default function PaymentForm() {
+src/features/payments/components/PaymentForm.jsx:  return <div>PaymentForm</div>;
+src/features/payments/components/PaymentList.jsx:export default function PaymentList() {
+src/features/payments/components/PaymentList.jsx:  return <div>PaymentList</div>;
+src/features/work-orders/WorkOrderPage.jsx:export default function WorkOrderPage() {
+src/features/work-orders/WorkOrderPage.jsx:  return <section>WorkOrderPage</section>;
+src/features/work-orders/components/WorkOrderDetail.jsx:export default function WorkOrderDetail() {
+src/features/work-orders/components/WorkOrderDetail.jsx:  return <div>WorkOrderDetail</div>;
+src/features/work-orders/components/ProductionStage.jsx:export default function ProductionStage() {
+src/features/work-orders/components/ProductionStage.jsx:  return <div>ProductionStage</div>;
+src/features/work-orders/components/ProductionBoard.jsx:export default function ProductionBoard() {
+src/features/work-orders/components/ProductionBoard.jsx:  return <div>ProductionBoard</div>;
+src/features/work-orders/components/WorkOrderList.jsx:export default function WorkOrderList() {
+src/features/work-orders/components/WorkOrderList.jsx:  return <div>WorkOrderList</div>;
+src/features/products/ProductPage.jsx:function createEmptyProductForm() {
+src/features/products/ProductPage.jsx:function generateProductId(products) {
+src/features/products/ProductPage.jsx:export default function ProductPage() {
+src/features/products/ProductPage.jsx:  const [products, setProducts] =
+src/features/products/ProductPage.jsx:      productStore.getProducts()
+src/features/products/ProductPage.jsx:    selectedProductId,
+src/features/products/ProductPage.jsx:    setSelectedProductId,
+src/features/products/ProductPage.jsx:    useState(createEmptyProductForm);
+src/features/products/ProductPage.jsx:    useState(createEmptyProductForm);
+src/features/products/ProductPage.jsx:  const selectedProduct =
+src/features/products/ProductPage.jsx:        selectedProductId
+src/features/products/ProductPage.jsx:  const filteredProducts =
+src/features/products/ProductPage.jsx:    setSelectedProductId(null);
+src/features/products/ProductPage.jsx:  function openNewProduct() {
+src/features/products/ProductPage.jsx:    setSelectedProductId(null);
+src/features/products/ProductPage.jsx:      createEmptyProductForm()
+src/features/products/ProductPage.jsx:  function openProductDetail(product) {
+src/features/products/ProductPage.jsx:    setSelectedProductId(
+src/features/products/ProductPage.jsx:    if (!selectedProduct) {
+src/features/products/ProductPage.jsx:        selectedProduct
+src/features/products/ProductPage.jsx:  function validateProduct(
+src/features/products/ProductPage.jsx:    excludedProductId = null
+src/features/products/ProductPage.jsx:      return "Product Name is required.";
+src/features/products/ProductPage.jsx:            excludedProductId &&
+src/features/products/ProductPage.jsx:      return "SKU or Product Name already exists.";
+src/features/products/ProductPage.jsx:  function buildProductRecord(
+src/features/products/ProductPage.jsx:  function handleCreateProduct(
+src/features/products/ProductPage.jsx:      validateProduct(formData);
+src/features/products/ProductPage.jsx:    const newProduct =
+src/features/products/ProductPage.jsx:      buildProductRecord(
+src/features/products/ProductPage.jsx:        generateProductId(
+src/features/products/ProductPage.jsx:    const nextProducts = [
+src/features/products/ProductPage.jsx:      newProduct,
+src/features/products/ProductPage.jsx:    productStore.replaceProducts(
+src/features/products/ProductPage.jsx:      nextProducts
+src/features/products/ProductPage.jsx:    setProducts(nextProducts);
+src/features/products/ProductPage.jsx:  function handleUpdateProduct(
+src/features/products/ProductPage.jsx:    if (!selectedProduct) {
+src/features/products/ProductPage.jsx:      validateProduct(
+src/features/products/ProductPage.jsx:        selectedProduct.productId
+src/features/products/ProductPage.jsx:    const updatedProduct =
+src/features/products/ProductPage.jsx:      buildProductRecord(
+src/features/products/ProductPage.jsx:        selectedProduct.productId,
+src/features/products/ProductPage.jsx:        selectedProduct.status
+src/features/products/ProductPage.jsx:    const nextProducts =
+src/features/products/ProductPage.jsx:          selectedProduct.productId
+src/features/products/ProductPage.jsx:            ? updatedProduct
+src/features/products/ProductPage.jsx:    productStore.replaceProducts(
+src/features/products/ProductPage.jsx:      nextProducts
+src/features/products/ProductPage.jsx:    setProducts(nextProducts);
+src/features/products/ProductPage.jsx:    if (!selectedProduct) {
+src/features/products/ProductPage.jsx:      selectedProduct.status ===
+src/features/products/ProductPage.jsx:        `Set ${selectedProduct.productName} to ${nextStatus}?`
+src/features/products/ProductPage.jsx:    const nextProducts =
+src/features/products/ProductPage.jsx:          selectedProduct.productId
+src/features/products/ProductPage.jsx:    productStore.replaceProducts(
+src/features/products/ProductPage.jsx:      nextProducts
+src/features/products/ProductPage.jsx:    setProducts(nextProducts);
+src/features/products/ProductPage.jsx:            Products
+src/features/products/ProductPage.jsx:            Manage Product Master data
+src/features/products/ProductPage.jsx:            used by Sales Orders.
+src/features/products/ProductPage.jsx:          onClick={openNewProduct}
+src/features/products/ProductPage.jsx:          + New Product
+src/features/products/ProductPage.jsx:                <th>Product Name</th>
+src/features/products/ProductPage.jsx:              {filteredProducts.length ===
+src/features/products/ProductPage.jsx:                filteredProducts.map(
+src/features/products/ProductPage.jsx:                        openProductDetail(
+src/features/products/ProductPage.jsx:            aria-label="Close Product Drawer"
+src/features/products/ProductPage.jsx:                    ? "New Product"
+src/features/products/ProductPage.jsx:                    ? "Edit Product"
+src/features/products/ProductPage.jsx:                    : "Product Detail"}
+src/features/products/ProductPage.jsx:                    ? "Create Product"
+src/features/products/ProductPage.jsx:                    : selectedProduct?.productName}
+src/features/products/ProductPage.jsx:                    ? "Product ID generated automatically"
+src/features/products/ProductPage.jsx:                    : selectedProduct?.productId}
+src/features/products/ProductPage.jsx:                  <ProductDetail
+src/features/products/ProductPage.jsx:                      selectedProduct
+src/features/products/ProductPage.jsx:                      selectedProduct
+src/features/products/ProductPage.jsx:                            selectedProduct.categoryId
+src/features/products/ProductPage.jsx:                      {selectedProduct?.status ===
+src/features/products/ProductPage.jsx:                    ? handleCreateProduct
+src/features/products/ProductPage.jsx:                    : handleUpdateProduct
+src/features/products/ProductPage.jsx:                <ProductTabs
+src/features/products/ProductPage.jsx:                  <ProductDrawerFields
+src/features/products/ProductPage.jsx:                        ? selectedProduct?.productId
+src/features/products/ProductPage.jsx:                        ? "Create Product"
+src/features/products/ProductPage.jsx:                        : "Update Product"}
+src/features/products/ProductPage.jsx:                  Create a new Product Category.
+src/features/products/ProductPage.jsx:function ProductTabs({
+src/features/products/ProductPage.jsx:function ProductDrawerFields({
+src/features/products/ProductPage.jsx:            <span>Product ID</span>
+src/features/products/ProductPage.jsx:            Product Name *
+src/features/products/ProductPage.jsx:        <span>Product Image</span>
+src/features/products/ProductPage.jsx:              alt="Product preview"
+src/features/products/ProductPage.jsx:            Choose Product Image
+src/features/products/ProductPage.jsx:function ProductDetail({
+src/features/products/ProductPage.jsx:          label="Product ID"
+src/features/products/ProductPage.jsx:          label="Product Name"
+src/features/products/components/ProductDetail.jsx:export default function ProductDetail() {
+src/features/products/components/ProductDetail.jsx:  return <div>ProductDetail</div>;
+src/features/products/components/ProductForm.jsx:import ProductCategoryModal from "./ProductCategoryModal.jsx";
+src/features/products/components/ProductForm.jsx:export function createEmptyProductForm() {
+src/features/products/components/ProductForm.jsx:export function buildProductDimension(product) {
+src/features/products/components/ProductForm.jsx:export default function ProductForm({
+src/features/products/components/ProductForm.jsx:          <span>Product Name *</span>
+src/features/products/components/ProductForm.jsx:            placeholder="Product description"
+src/features/products/components/ProductForm.jsx:      <ProductCategoryModal
+src/features/products/components/ProductCategoryModal.jsx:export default function ProductCategoryModal({
+src/features/products/components/ProductCategoryModal.jsx:            <p>Create a new Product Category.</p>
+src/features/products/components/ProductList.jsx:export default function ProductList() {
+src/features/products/components/ProductList.jsx:  return <div>ProductList</div>;
+src/features/dashboard/DashboardPage.jsx:import RecentOrders from "./components/RecentOrders.jsx";
+src/features/dashboard/DashboardPage.jsx:      <RecentOrders />
+src/features/dashboard/components/RecentOrders.jsx:export default function RecentOrders() {
+src/features/dashboard/components/RecentOrders.jsx:      <h2 className="dashboard-section-title">Recent Orders</h2>
+src/features/sales-orders/NewSalesOrderForm.jsx:import CustomerForm, {
+src/features/sales-orders/NewSalesOrderForm.jsx:  createEmptyCustomerForm,
+src/features/sales-orders/NewSalesOrderForm.jsx:  buildCustomerDisplayName,
+src/features/sales-orders/NewSalesOrderForm.jsx:} from "../customers/components/CustomerForm.jsx";
+src/features/sales-orders/NewSalesOrderForm.jsx:import ProductForm, {
+src/features/sales-orders/NewSalesOrderForm.jsx:  createEmptyProductForm,
+src/features/sales-orders/NewSalesOrderForm.jsx:  buildProductDimension,
+src/features/sales-orders/NewSalesOrderForm.jsx:} from "../products/components/ProductForm.jsx";
+src/features/sales-orders/NewSalesOrderForm.jsx:import "./salesOrder.css";
+src/features/sales-orders/NewSalesOrderForm.jsx:function getCustomerLabel(customer) {
+src/features/sales-orders/NewSalesOrderForm.jsx:    "Unnamed Customer"
+src/features/sales-orders/NewSalesOrderForm.jsx:function generateCustomerId(customers) {
+src/features/sales-orders/NewSalesOrderForm.jsx:function generateProductId(products) {
+src/features/sales-orders/NewSalesOrderForm.jsx:export default function NewSalesOrderForm({ onCancel }) {
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [customers, setCustomers] = useState(() =>
+src/features/sales-orders/NewSalesOrderForm.jsx:    customerStore.getActiveCustomers()
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [products, setProducts] = useState(() =>
+src/features/sales-orders/NewSalesOrderForm.jsx:    productStore.getActiveProducts()
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [orderType, setOrderType] = useState("DIRECT");
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [orderDate, setOrderDate] = useState(TODAY);
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [selectedCustomerId, setSelectedCustomerId] = useState("");
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [customer, setCustomer] = useState("");
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [customerMobile, setCustomerMobile] = useState("");
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [customerEmail, setCustomerEmail] = useState("");
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [customerAddress, setCustomerAddress] = useState("");
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [showCustomerForm, setShowCustomerForm] = useState(false);
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [newCustomerData, setNewCustomerData] = useState(
+src/features/sales-orders/NewSalesOrderForm.jsx:    createEmptyCustomerForm
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [showProductForm, setShowProductForm] = useState(false);
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [activeProductItemId, setActiveProductItemId] = useState(null);
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [newProductData, setNewProductData] = useState(createEmptyProductForm);
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [marketplaceCustomer, setMarketplaceCustomer] = useState("");
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [paymentAdded, setPaymentAdded] = useState(false);
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [paymentMethod, setPaymentMethod] = useState("Cash");
+src/features/sales-orders/NewSalesOrderForm.jsx:  const [paymentReference, setPaymentReference] = useState("");
+src/features/sales-orders/NewSalesOrderForm.jsx:  function handleCustomerChange(event) {
+src/features/sales-orders/NewSalesOrderForm.jsx:    setSelectedCustomerId(customerId);
+src/features/sales-orders/NewSalesOrderForm.jsx:      setCustomer("");
+src/features/sales-orders/NewSalesOrderForm.jsx:      setCustomerMobile("");
+src/features/sales-orders/NewSalesOrderForm.jsx:      setCustomerEmail("");
+src/features/sales-orders/NewSalesOrderForm.jsx:      setCustomerAddress("");
+src/features/sales-orders/NewSalesOrderForm.jsx:    setCustomer(getCustomerLabel(selected));
+src/features/sales-orders/NewSalesOrderForm.jsx:    setCustomerMobile(selected.mobile || "");
+src/features/sales-orders/NewSalesOrderForm.jsx:    setCustomerEmail(selected.email || "");
+src/features/sales-orders/NewSalesOrderForm.jsx:    setCustomerAddress(selected.address || "");
+src/features/sales-orders/NewSalesOrderForm.jsx:  function handleAddCustomer() {
+src/features/sales-orders/NewSalesOrderForm.jsx:    setNewCustomerData(createEmptyCustomerForm());
+src/features/sales-orders/NewSalesOrderForm.jsx:    setShowCustomerForm(true);
+src/features/sales-orders/NewSalesOrderForm.jsx:  function handleNewCustomerChange(event) {
+src/features/sales-orders/NewSalesOrderForm.jsx:    setNewCustomerData((current) => ({
+src/features/sales-orders/NewSalesOrderForm.jsx:  function handleCreateCustomer(event) {
+src/features/sales-orders/NewSalesOrderForm.jsx:    const customerName = newCustomerData.customerName.trim();
+src/features/sales-orders/NewSalesOrderForm.jsx:      setError("Customer Name is required.");
+src/features/sales-orders/NewSalesOrderForm.jsx:    if (!newCustomerData.customerType) {
+src/features/sales-orders/NewSalesOrderForm.jsx:      setError("Please select Customer Type.");
+src/features/sales-orders/NewSalesOrderForm.jsx:    const displayName = buildCustomerDisplayName(
+src/features/sales-orders/NewSalesOrderForm.jsx:      newCustomerData.customerName,
+src/features/sales-orders/NewSalesOrderForm.jsx:      newCustomerData.company
+src/features/sales-orders/NewSalesOrderForm.jsx:    const existing = customerStore.getCustomers();
+src/features/sales-orders/NewSalesOrderForm.jsx:    const newCustomer = {
+src/features/sales-orders/NewSalesOrderForm.jsx:      customerId: generateCustomerId(existing),
+src/features/sales-orders/NewSalesOrderForm.jsx:      company: newCustomerData.company.trim(),
+src/features/sales-orders/NewSalesOrderForm.jsx:      customerType: newCustomerData.customerType,
+src/features/sales-orders/NewSalesOrderForm.jsx:      mobile: newCustomerData.mobile.trim(),
+src/features/sales-orders/NewSalesOrderForm.jsx:      email: newCustomerData.email.trim(),
+src/features/sales-orders/NewSalesOrderForm.jsx:      address: newCustomerData.address.trim(),
+src/features/sales-orders/NewSalesOrderForm.jsx:      notes: newCustomerData.notes.trim(),
+src/features/sales-orders/NewSalesOrderForm.jsx:    const next = [...existing, newCustomer];
+src/features/sales-orders/NewSalesOrderForm.jsx:    customerStore.replaceCustomers(next);
+src/features/sales-orders/NewSalesOrderForm.jsx:    setCustomers(customerStore.getActiveCustomers());
+src/features/sales-orders/NewSalesOrderForm.jsx:    setSelectedCustomerId(newCustomer.customerId);
+src/features/sales-orders/NewSalesOrderForm.jsx:    setCustomer(newCustomer.displayName);
+src/features/sales-orders/NewSalesOrderForm.jsx:    setCustomerMobile(newCustomer.mobile);
+src/features/sales-orders/NewSalesOrderForm.jsx:    setCustomerEmail(newCustomer.email);
+src/features/sales-orders/NewSalesOrderForm.jsx:    setCustomerAddress(newCustomer.address);
+src/features/sales-orders/NewSalesOrderForm.jsx:    setNewCustomerData(createEmptyCustomerForm());
+src/features/sales-orders/NewSalesOrderForm.jsx:    setShowCustomerForm(false);
+src/features/sales-orders/NewSalesOrderForm.jsx:  function handleProductChange(itemId, productId) {
+src/features/sales-orders/NewSalesOrderForm.jsx:  function handleAddProduct(itemId) {
+src/features/sales-orders/NewSalesOrderForm.jsx:    setActiveProductItemId(itemId);
+src/features/sales-orders/NewSalesOrderForm.jsx:    setNewProductData(createEmptyProductForm());
+src/features/sales-orders/NewSalesOrderForm.jsx:    setShowProductForm(true);
+src/features/sales-orders/NewSalesOrderForm.jsx:  function handleNewProductChange(event) {
+src/features/sales-orders/NewSalesOrderForm.jsx:    setNewProductData((current) => ({
+src/features/sales-orders/NewSalesOrderForm.jsx:  function validateNewProduct() {
+src/features/sales-orders/NewSalesOrderForm.jsx:    if (!newProductData.sku.trim()) {
+src/features/sales-orders/NewSalesOrderForm.jsx:    if (!newProductData.productName.trim()) {
+src/features/sales-orders/NewSalesOrderForm.jsx:      return "Product Name is required.";
+src/features/sales-orders/NewSalesOrderForm.jsx:    if (!newProductData.categoryId) {
+src/features/sales-orders/NewSalesOrderForm.jsx:    if (!newProductData.unit.trim()) {
+src/features/sales-orders/NewSalesOrderForm.jsx:    if (Number(newProductData.costPrice || 0) < 0) {
+src/features/sales-orders/NewSalesOrderForm.jsx:    if (Number(newProductData.sellingPrice || 0) < 0) {
+src/features/sales-orders/NewSalesOrderForm.jsx:    const existing = productStore.getProducts();
+src/features/sales-orders/NewSalesOrderForm.jsx:          newProductData.sku.trim().toLowerCase() ||
+src/features/sales-orders/NewSalesOrderForm.jsx:          newProductData.productName.trim().toLowerCase()
+src/features/sales-orders/NewSalesOrderForm.jsx:      return "SKU or Product Name already exists.";
+src/features/sales-orders/NewSalesOrderForm.jsx:  function handleCreateProduct(event) {
+src/features/sales-orders/NewSalesOrderForm.jsx:    const validationError = validateNewProduct();
+src/features/sales-orders/NewSalesOrderForm.jsx:    const existing = productStore.getProducts();
+src/features/sales-orders/NewSalesOrderForm.jsx:    const newProduct = {
+src/features/sales-orders/NewSalesOrderForm.jsx:      productId: generateProductId(existing),
+src/features/sales-orders/NewSalesOrderForm.jsx:      sku: newProductData.sku.trim(),
+src/features/sales-orders/NewSalesOrderForm.jsx:      productName: newProductData.productName.trim(),
+src/features/sales-orders/NewSalesOrderForm.jsx:      categoryId: newProductData.categoryId,
+src/features/sales-orders/NewSalesOrderForm.jsx:      unit: newProductData.unit.trim(),
+src/features/sales-orders/NewSalesOrderForm.jsx:      costPrice: Number(newProductData.costPrice || 0),
+src/features/sales-orders/NewSalesOrderForm.jsx:      sellingPrice: Number(newProductData.sellingPrice || 0),
+src/features/sales-orders/NewSalesOrderForm.jsx:      material: newProductData.material.trim(),
+src/features/sales-orders/NewSalesOrderForm.jsx:      specification: newProductData.specification.trim(),
+src/features/sales-orders/NewSalesOrderForm.jsx:      color: newProductData.color.trim(),
+src/features/sales-orders/NewSalesOrderForm.jsx:      thickness: newProductData.thickness,
+src/features/sales-orders/NewSalesOrderForm.jsx:      length: newProductData.length,
+src/features/sales-orders/NewSalesOrderForm.jsx:      width: newProductData.width,
+src/features/sales-orders/NewSalesOrderForm.jsx:      height: newProductData.height,
+src/features/sales-orders/NewSalesOrderForm.jsx:      description: newProductData.description.trim(),
+src/features/sales-orders/NewSalesOrderForm.jsx:      image: newProductData.image,
+src/features/sales-orders/NewSalesOrderForm.jsx:    const next = [...existing, newProduct];
+src/features/sales-orders/NewSalesOrderForm.jsx:    productStore.replaceProducts(next);
+src/features/sales-orders/NewSalesOrderForm.jsx:    setProducts(productStore.getActiveProducts());
+src/features/sales-orders/NewSalesOrderForm.jsx:    if (activeProductItemId) {
+src/features/sales-orders/NewSalesOrderForm.jsx:          item.id === activeProductItemId
+src/features/sales-orders/NewSalesOrderForm.jsx:                productId: newProduct.productId,
+src/features/sales-orders/NewSalesOrderForm.jsx:                unitPrice: newProduct.sellingPrice,
+src/features/sales-orders/NewSalesOrderForm.jsx:    setNewProductData(createEmptyProductForm());
+src/features/sales-orders/NewSalesOrderForm.jsx:    setActiveProductItemId(null);
+src/features/sales-orders/NewSalesOrderForm.jsx:    setShowProductForm(false);
+src/features/sales-orders/NewSalesOrderForm.jsx:      setError("Deadline tidak boleh sebelum Order Date.");
+src/features/sales-orders/NewSalesOrderForm.jsx:  function handleAddPayment() {
+src/features/sales-orders/NewSalesOrderForm.jsx:    setPaymentAdded(true);
+src/features/sales-orders/NewSalesOrderForm.jsx:  function handleCreateOrder() {
+src/features/sales-orders/NewSalesOrderForm.jsx:      setError("Order Date wajib diisi.");
+src/features/sales-orders/NewSalesOrderForm.jsx:      setError("Deadline tidak boleh sebelum Order Date.");
+src/features/sales-orders/NewSalesOrderForm.jsx:    if (orderType === "DIRECT" && !selectedCustomerId) {
+src/features/sales-orders/NewSalesOrderForm.jsx:      setError("Customer wajib dipilih.");
+src/features/sales-orders/NewSalesOrderForm.jsx:      setError("Product wajib dipilih dari Product Master.");
+src/features/sales-orders/NewSalesOrderForm.jsx:      marketplaceCustomer,
+src/features/sales-orders/NewSalesOrderForm.jsx:          productName: product?.productName || "Unknown Product",
+src/features/sales-orders/NewSalesOrderForm.jsx:          dimension: buildProductDimension(product),
+src/features/sales-orders/NewSalesOrderForm.jsx:        <h1>New Sales Order</h1>
+src/features/sales-orders/NewSalesOrderForm.jsx:        <div className="sales-order-card-header">Order Type</div>
+src/features/sales-orders/NewSalesOrderForm.jsx:                onChange={(event) => setOrderType(event.target.value)}
+src/features/sales-orders/NewSalesOrderForm.jsx:              <span>Direct Order</span>
+src/features/sales-orders/NewSalesOrderForm.jsx:                onChange={(event) => setOrderType(event.target.value)}
+src/features/sales-orders/NewSalesOrderForm.jsx:            <div className="sales-order-card-header">Order Information</div>
+src/features/sales-orders/NewSalesOrderForm.jsx:                  <label>Order Date</label>
+src/features/sales-orders/NewSalesOrderForm.jsx:                      setOrderDate(value);
+src/features/sales-orders/NewSalesOrderForm.jsx:              <span>Customer Information</span>
+src/features/sales-orders/NewSalesOrderForm.jsx:                onClick={handleAddCustomer}>
+src/features/sales-orders/NewSalesOrderForm.jsx:                + Add Customer
+src/features/sales-orders/NewSalesOrderForm.jsx:                <label>Customer</label>
+src/features/sales-orders/NewSalesOrderForm.jsx:                  value={selectedCustomerId}
+src/features/sales-orders/NewSalesOrderForm.jsx:                  onChange={handleCustomerChange}>
+src/features/sales-orders/NewSalesOrderForm.jsx:                  <option value="">Select Customer...</option>
+src/features/sales-orders/NewSalesOrderForm.jsx:                      {getCustomerLabel(item)}
+src/features/sales-orders/NewSalesOrderForm.jsx:              <div className="sales-order-card-header">Order Information</div>
+src/features/sales-orders/NewSalesOrderForm.jsx:                    <label>Order Date</label>
+src/features/sales-orders/NewSalesOrderForm.jsx:                      onChange={(event) => setOrderDate(event.target.value)}
+src/features/sales-orders/NewSalesOrderForm.jsx:              <div className="sales-order-card-header">Payment Information</div>
+src/features/sales-orders/NewSalesOrderForm.jsx:                    <span>Payment Status</span>
+src/features/sales-orders/NewSalesOrderForm.jsx:                    <span>Payment Method</span>
+src/features/sales-orders/NewSalesOrderForm.jsx:                    <span>Payment Type</span>
+src/features/sales-orders/NewSalesOrderForm.jsx:                    <label>Customer</label>
+src/features/sales-orders/NewSalesOrderForm.jsx:                      value={marketplaceCustomer}
+src/features/sales-orders/NewSalesOrderForm.jsx:                        setMarketplaceCustomer(event.target.value)
+src/features/sales-orders/NewSalesOrderForm.jsx:                      placeholder="Customer name"
+src/features/sales-orders/NewSalesOrderForm.jsx:          <span>Order Items</span>
+src/features/sales-orders/NewSalesOrderForm.jsx:            const selectedProduct = products.find(
+src/features/sales-orders/NewSalesOrderForm.jsx:                      <label>Product</label>
+src/features/sales-orders/NewSalesOrderForm.jsx:                          handleProductChange(item.id, event.target.value)
+src/features/sales-orders/NewSalesOrderForm.jsx:                        <option value="">Select Product...</option>
+src/features/sales-orders/NewSalesOrderForm.jsx:                      onClick={() => handleAddProduct(item.id)}>
+src/features/sales-orders/NewSalesOrderForm.jsx:                      + Add Product
+src/features/sales-orders/NewSalesOrderForm.jsx:                  {selectedProduct && (
+src/features/sales-orders/NewSalesOrderForm.jsx:                        <strong>{selectedProduct.sku || "—"}</strong>
+src/features/sales-orders/NewSalesOrderForm.jsx:                        <strong>{selectedProduct.material || "—"}</strong>
+src/features/sales-orders/NewSalesOrderForm.jsx:                              category.categoryId === selectedProduct.categoryId
+src/features/sales-orders/NewSalesOrderForm.jsx:                                selectedProduct.categoryId
+src/features/sales-orders/NewSalesOrderForm.jsx:                        <strong>{selectedProduct.thickness || "—"}</strong>
+src/features/sales-orders/NewSalesOrderForm.jsx:                          {buildProductDimension(selectedProduct)}
+src/features/sales-orders/NewSalesOrderForm.jsx:                        <strong>{selectedProduct.color || "—"}</strong>
+src/features/sales-orders/NewSalesOrderForm.jsx:                        <strong>{selectedProduct.specification || "—"}</strong>
+src/features/sales-orders/NewSalesOrderForm.jsx:            <span>Payment</span>
+src/features/sales-orders/NewSalesOrderForm.jsx:              onClick={handleAddPayment}>
+src/features/sales-orders/NewSalesOrderForm.jsx:              + Add Payment
+src/features/sales-orders/NewSalesOrderForm.jsx:                <strong>Payment Method</strong>
+src/features/sales-orders/NewSalesOrderForm.jsx:                    onChange={(event) => setPaymentMethod(event.target.value)}
+src/features/sales-orders/NewSalesOrderForm.jsx:                    onChange={(event) => setPaymentMethod(event.target.value)}
+src/features/sales-orders/NewSalesOrderForm.jsx:                    onChange={(event) => setPaymentMethod(event.target.value)}
+src/features/sales-orders/NewSalesOrderForm.jsx:                  onChange={(event) => setPaymentReference(event.target.value)}
+src/features/sales-orders/NewSalesOrderForm.jsx:                  placeholder="Payment reference"
+src/features/sales-orders/NewSalesOrderForm.jsx:          onClick={handleCreateOrder}>
+src/features/sales-orders/NewSalesOrderForm.jsx:          {orderType === "MARKETPLACE" ? "Create WO" : "Create Order"}
+src/features/sales-orders/NewSalesOrderForm.jsx:      {showCustomerForm && (
+src/features/sales-orders/NewSalesOrderForm.jsx:            onClick={() => setShowCustomerForm(false)}
+src/features/sales-orders/NewSalesOrderForm.jsx:            aria-label="Close Customer Form"
+src/features/sales-orders/NewSalesOrderForm.jsx:                <span className="customer-detail-eyebrow">New Customer</span>
+src/features/sales-orders/NewSalesOrderForm.jsx:                <h2>Create Customer</h2>
+src/features/sales-orders/NewSalesOrderForm.jsx:                  Customer ID generated automatically
+src/features/sales-orders/NewSalesOrderForm.jsx:                onClick={() => setShowCustomerForm(false)}
+src/features/sales-orders/NewSalesOrderForm.jsx:              onSubmit={handleCreateCustomer}>
+src/features/sales-orders/NewSalesOrderForm.jsx:                  <CustomerForm
+src/features/sales-orders/NewSalesOrderForm.jsx:                    data={newCustomerData}
+src/features/sales-orders/NewSalesOrderForm.jsx:                    onChange={handleNewCustomerChange}
+src/features/sales-orders/NewSalesOrderForm.jsx:                  onClick={() => setShowCustomerForm(false)}>
+src/features/sales-orders/NewSalesOrderForm.jsx:                  Create Customer
+src/features/sales-orders/NewSalesOrderForm.jsx:      {showProductForm && (
+src/features/sales-orders/NewSalesOrderForm.jsx:              setShowProductForm(false);
+src/features/sales-orders/NewSalesOrderForm.jsx:              setActiveProductItemId(null);
+src/features/sales-orders/NewSalesOrderForm.jsx:            aria-label="Close Product Form"
+src/features/sales-orders/NewSalesOrderForm.jsx:                <span className="product-detail-eyebrow">New Product</span>
+src/features/sales-orders/NewSalesOrderForm.jsx:                <h2>Create Product</h2>
+src/features/sales-orders/NewSalesOrderForm.jsx:                  Product ID generated automatically
+src/features/sales-orders/NewSalesOrderForm.jsx:                  setShowProductForm(false);
+src/features/sales-orders/NewSalesOrderForm.jsx:                  setActiveProductItemId(null);
+src/features/sales-orders/NewSalesOrderForm.jsx:              onSubmit={handleCreateProduct}>
+src/features/sales-orders/NewSalesOrderForm.jsx:                  <ProductForm
+src/features/sales-orders/NewSalesOrderForm.jsx:                    data={newProductData}
+src/features/sales-orders/NewSalesOrderForm.jsx:                    onChange={handleNewProductChange}
+src/features/sales-orders/NewSalesOrderForm.jsx:                    setShowProductForm(false);
+src/features/sales-orders/NewSalesOrderForm.jsx:                    setActiveProductItemId(null);
+src/features/sales-orders/NewSalesOrderForm.jsx:                  Create Product
+src/features/sales-orders/NewSalesOrderForm.jsx:                <h2>Review Sales Order</h2>
+src/features/sales-orders/NewSalesOrderForm.jsx:                  <small>Order Type</small>
+src/features/sales-orders/NewSalesOrderForm.jsx:                    {orderType === "DIRECT" ? "Direct Order" : "Marketplace"}
+src/features/sales-orders/NewSalesOrderForm.jsx:                  <small>Order Date</small>
+src/features/sales-orders/NewSalesOrderForm.jsx:                <h3>Customer</h3>
+src/features/sales-orders/NewSalesOrderForm.jsx:                <p>{customer || marketplaceCustomer || "—"}</p>
+src/features/sales-orders/NewSalesOrderForm.jsx:                <h3>Order Items</h3>
+src/features/sales-orders/salesOrder.css:/* Create Order / Create WO */
+src/features/sales-orders/salesOrder.css:/* Order item content */
+src/features/sales-orders/SalesOrderPage.jsx:import NewSalesOrderForm from "./NewSalesOrderForm";
+src/features/sales-orders/SalesOrderPage.jsx:import "./salesOrder.css";
+src/features/sales-orders/SalesOrderPage.jsx:export default function SalesOrderPage({ onNavigate }) {
+src/features/sales-orders/SalesOrderPage.jsx:  const [showNewOrder, setShowNewOrder] = useState(false);
+src/features/sales-orders/SalesOrderPage.jsx:  if (showNewOrder) {
+src/features/sales-orders/SalesOrderPage.jsx:      <NewSalesOrderForm
+src/features/sales-orders/SalesOrderPage.jsx:        onCancel={() => setShowNewOrder(false)}
+src/features/sales-orders/SalesOrderPage.jsx:          <h1>Sales Order</h1>
+src/features/sales-orders/SalesOrderPage.jsx:          onClick={() => setShowNewOrder(true)}>
+src/features/sales-orders/SalesOrderPage.jsx:          + New Order
+src/features/sales-orders/SalesOrderPage.jsx:        <h2>Sales Order Module</h2>
+src/features/sales-orders/SalesOrderPage.jsx:        <p>Sales Order V3 foundation ready.</p>
+src/features/sales-orders/components/CustomerInformation.jsx:export default function CustomerInformation() {
+src/features/sales-orders/components/CustomerInformation.jsx:        Customer Information
+src/features/sales-orders/components/CustomerInformation.jsx:      <div className="p-3 text-xs">Customer form placeholder</div>
+src/features/sales-orders/components/SalesOrderContext.jsx:const SalesOrderContext = createContext();
+src/features/sales-orders/components/SalesOrderContext.jsx:export function SalesOrderProvider({ children }) {
+src/features/sales-orders/components/SalesOrderContext.jsx:  const [salesOrders, setSalesOrders] = useState([]);
+src/features/sales-orders/components/SalesOrderContext.jsx:  const [selectedOrder, setSelectedOrder] = useState(null);
+src/features/sales-orders/components/SalesOrderContext.jsx:  function createSalesOrder(order) {
+src/features/sales-orders/components/SalesOrderContext.jsx:    setSalesOrders((previous) => [...previous, order]);
+src/features/sales-orders/components/SalesOrderContext.jsx:    <SalesOrderContext.Provider
+src/features/sales-orders/components/SalesOrderContext.jsx:        salesOrders,
+src/features/sales-orders/components/SalesOrderContext.jsx:        selectedOrder,
+src/features/sales-orders/components/SalesOrderContext.jsx:        setSelectedOrder,
+src/features/sales-orders/components/SalesOrderContext.jsx:        createSalesOrder,
+src/features/sales-orders/components/SalesOrderContext.jsx:    </SalesOrderContext.Provider>
+src/features/sales-orders/components/SalesOrderContext.jsx:export function useSalesOrderContext() {
+src/features/sales-orders/components/SalesOrderContext.jsx:  return useContext(SalesOrderContext);
+src/features/sales-orders/components/OrderInformation.jsx:export default function OrderInformation() {
+src/features/sales-orders/components/OrderInformation.jsx:  return <section>Order Information</section>;
+src/features/sales-orders/components/OrderItems.jsx:export default function OrderItems() {
+src/features/sales-orders/components/OrderItems.jsx:  return <section>Order Items</section>;
+src/features/sales-orders/components/OrderTypeSection.jsx:export default function OrderTypeSection({ salesOrder, updateSalesOrder }) {
+src/features/sales-orders/components/OrderTypeSection.jsx:      <div className="erp-card-header">Order Type</div>
+src/features/sales-orders/components/OrderTypeSection.jsx:              value="Direct Order"
+src/features/sales-orders/components/OrderTypeSection.jsx:              checked={salesOrder.orderType === "Direct Order"}
+src/features/sales-orders/components/OrderTypeSection.jsx:              onChange={(e) => updateSalesOrder("orderType", e.target.value)}
+src/features/sales-orders/components/OrderTypeSection.jsx:            <span>Direct Order</span>
+src/features/sales-orders/components/OrderTypeSection.jsx:              checked={salesOrder.orderType === "Marketplace"}
+src/features/sales-orders/components/OrderTypeSection.jsx:              onChange={(e) => updateSalesOrder("orderType", e.target.value)}
+src/features/sales-orders/components/PaymentSection.jsx:export default function PaymentSection() {
+src/features/sales-orders/components/PaymentSection.jsx:  return <section>Payment Section</section>;
+src/features/sales-orders/components/SalesOrderPreview.jsx:export default function SalesOrderPreview({ salesOrder, onBack, onConfirm }) {
+src/features/sales-orders/components/SalesOrderPreview.jsx:  const isMarketplace = salesOrder?.orderType === "MARKETPLACE";
+src/features/sales-orders/components/SalesOrderPreview.jsx:  const items = Array.isArray(salesOrder?.items) ? salesOrder.items : [];
+src/features/sales-orders/components/SalesOrderPreview.jsx:  const amountPaid = Number(salesOrder?.amountPaid) || 0;
+src/features/sales-orders/components/SalesOrderPreview.jsx:            <h2>Review Sales Order</h2>
+src/features/sales-orders/components/SalesOrderPreview.jsx:            <h3>Order Information</h3>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                    salesOrder?.soNumber ||
+src/features/sales-orders/components/SalesOrderPreview.jsx:                      salesOrder?.orderNumber ||
+src/features/sales-orders/components/SalesOrderPreview.jsx:                <span>Order Date</span>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                <strong>{valueOrDash(salesOrder?.orderDate)}</strong>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                <strong>{valueOrDash(salesOrder?.deadline)}</strong>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                  {valueOrDash(salesOrder?.priority || "Regular")}
+src/features/sales-orders/components/SalesOrderPreview.jsx:                <h3>Payment Information</h3>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                    <span>Payment Status</span>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                    <span>Payment Method</span>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                    <span>Payment Type</span>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                    <strong>{valueOrDash(salesOrder?.trackingNumber)}</strong>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                    <span>Customer</span>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                      {valueOrDash(salesOrder?.marketplaceCustomer)}
+src/features/sales-orders/components/SalesOrderPreview.jsx:                    <strong>{valueOrDash(salesOrder?.marketplace)}</strong>
+src/features/sales-orders/components/SalesOrderPreview.jsx:              <h3>Customer Information</h3>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                  <span>Customer</span>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                  <strong>{valueOrDash(salesOrder?.customer)}</strong>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                  <strong>{valueOrDash(salesOrder?.mobile)}</strong>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                  <strong>{valueOrDash(salesOrder?.email)}</strong>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                  <strong>{valueOrDash(salesOrder?.address)}</strong>
+src/features/sales-orders/components/SalesOrderPreview.jsx:              <h3>Order Items</h3>
+src/features/sales-orders/components/SalesOrderPreview.jsx:              <h3>Payment</h3>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                  <span>Payment Method</span>
+src/features/sales-orders/components/SalesOrderPreview.jsx:                  <strong>{valueOrDash(salesOrder?.paymentMethod)}</strong>
+src/features/sales-orders/components/SalesOrderPreview.jsx:            {isMarketplace ? "Create WO" : "Create Order"}
+src/features/sales-orders/hooks/useSalesOrder.js:const initialSalesOrder = {
+src/features/sales-orders/hooks/useSalesOrder.js:  orderType: "Direct Order",
+src/features/sales-orders/hooks/useSalesOrder.js:const initialSalesOrders = [
+src/features/sales-orders/hooks/useSalesOrder.js:    orderType: "Direct Order",
+src/features/sales-orders/hooks/useSalesOrder.js:export function useSalesOrder() {
+src/features/sales-orders/hooks/useSalesOrder.js:  const [salesOrder, setSalesOrder] = useState(initialSalesOrder);
+src/features/sales-orders/hooks/useSalesOrder.js:  const [salesOrders, setSalesOrders] = useState(initialSalesOrders);
+src/features/sales-orders/hooks/useSalesOrder.js:  const [selectedOrder, setSelectedOrder] = useState(null);
+src/features/sales-orders/hooks/useSalesOrder.js:  function updateSalesOrder(field, value) {
+src/features/sales-orders/hooks/useSalesOrder.js:    setSalesOrder((previous) => ({
+src/features/sales-orders/hooks/useSalesOrder.js:  function selectOrder(order) {
+src/features/sales-orders/hooks/useSalesOrder.js:    setSelectedOrder(order);
+src/features/sales-orders/hooks/useSalesOrder.js:  function createSalesOrder(order) {
+src/features/sales-orders/hooks/useSalesOrder.js:    setSalesOrders((previous) => [...previous, order]);
+src/features/sales-orders/hooks/useSalesOrder.js:  function resetSalesOrder() {
+src/features/sales-orders/hooks/useSalesOrder.js:    setSalesOrder(initialSalesOrder);
+src/features/sales-orders/hooks/useSalesOrder.js:    // New Order Form
+src/features/sales-orders/hooks/useSalesOrder.js:    salesOrder,
+src/features/sales-orders/hooks/useSalesOrder.js:    updateSalesOrder,
+src/features/sales-orders/hooks/useSalesOrder.js:    resetSalesOrder,
+src/features/sales-orders/hooks/useSalesOrder.js:    // Sales Order List
+src/features/sales-orders/hooks/useSalesOrder.js:    salesOrders,
+src/features/sales-orders/hooks/useSalesOrder.js:    createSalesOrder,
+src/features/sales-orders/hooks/useSalesOrder.js:    selectedOrder,
+src/features/sales-orders/hooks/useSalesOrder.js:    selectOrder,
+src/repositories/customers/customerRepository.js:function readCustomers() {
+src/repositories/customers/customerRepository.js:function writeCustomers(customers) {
+src/repositories/customers/customerRepository.js:    throw new TypeError("Customer repository expects an array.");
+src/repositories/customers/customerRepository.js:    return readCustomers();
+src/repositories/customers/customerRepository.js:    return writeCustomers(customers);
+src/repositories/payments/localStoragePaymentRepository.js:export const localStoragePaymentRepository = {};
+src/repositories/payments/paymentRepository.js:function readPayments() {
+src/repositories/payments/paymentRepository.js:function writePayments(payments) {
+src/repositories/payments/paymentRepository.js:    throw new TypeError("Payment repository expects an array.");
+src/repositories/payments/paymentRepository.js:    return readPayments();
+src/repositories/payments/paymentRepository.js:    const currentPayments = readPayments();
+src/repositories/payments/paymentRepository.js:    const nextPayments = [...currentPayments, payment];
+src/repositories/payments/paymentRepository.js:    writePayments(nextPayments);
+src/repositories/payments/paymentRepository.js:    return writePayments(payments);
+src/repositories/products/productRepository.js:function readProducts() {
+src/repositories/products/productRepository.js:function writeProducts(products) {
+src/repositories/products/productRepository.js:    throw new TypeError("Product repository expects an array.");
+src/repositories/products/productRepository.js:    return readProducts();
+src/repositories/products/productRepository.js:    return writeProducts(products);
+src/repositories/salesOrders/localStorageSalesOrderRepository.js:export const localStorageSalesOrderRepository = {};
+src/repositories/salesOrders/salesOrderRepository.js:function readSalesOrders() {
+src/repositories/salesOrders/salesOrderRepository.js:function writeSalesOrders(salesOrders) {
+src/repositories/salesOrders/salesOrderRepository.js:  if (!Array.isArray(salesOrders)) {
+src/repositories/salesOrders/salesOrderRepository.js:    throw new TypeError("Sales Order repository expects an array.");
+src/repositories/salesOrders/salesOrderRepository.js:    return salesOrders;
+src/repositories/salesOrders/salesOrderRepository.js:    JSON.stringify(salesOrders)
+src/repositories/salesOrders/salesOrderRepository.js:  return salesOrders;
+src/repositories/salesOrders/salesOrderRepository.js:export const salesOrderRepository = {
+src/repositories/salesOrders/salesOrderRepository.js:    return readSalesOrders();
+src/repositories/salesOrders/salesOrderRepository.js:  append(salesOrder) {
+src/repositories/salesOrders/salesOrderRepository.js:    const current = readSalesOrders();
+src/repositories/salesOrders/salesOrderRepository.js:    const next = [...current, salesOrder];
+src/repositories/salesOrders/salesOrderRepository.js:    writeSalesOrders(next);
+src/repositories/salesOrders/salesOrderRepository.js:    return salesOrder;
+src/repositories/salesOrders/salesOrderRepository.js:  replaceAll(salesOrders) {
+src/repositories/salesOrders/salesOrderRepository.js:    return writeSalesOrders(salesOrders);
+src/repositories/workOrders/workOrderRepository.js:export const workOrderRepository = {};
+src/state/productStore.js:  getProducts() {
+src/state/productStore.js:  getActiveProducts() {
+src/state/productStore.js:  replaceProducts(products) {
+src/state/productStore.js:  clearProducts() {
+src/state/customerStore.js:  getCustomers() {
+src/state/customerStore.js:  getActiveCustomers() {
+src/state/customerStore.js:  replaceCustomers(customers) {
+src/state/customerStore.js:  clearCustomers() {
+src/state/paymentStore.js:  getPayments() {
+src/state/paymentStore.js:  getPaymentsBySO(soNumber) {
+src/state/paymentStore.js:  addPayment(payment) {
+src/state/paymentStore.js:  replacePayments(payments) {
+src/state/paymentStore.js:  clearPayments() {
+src/state/salesOrderStore.js:import { salesOrderRepository } from "../repositories/salesOrders/salesOrderRepository.js";
+src/state/salesOrderStore.js:export const salesOrderStore = {
+src/state/salesOrderStore.js:  getSalesOrders() {
+src/state/salesOrderStore.js:    return salesOrderRepository.getAll();
+src/state/salesOrderStore.js:  addSalesOrder(salesOrder) {
+src/state/salesOrderStore.js:    return salesOrderRepository.append(salesOrder);
+src/state/salesOrderStore.js:  replaceSalesOrders(salesOrders) {
+src/state/salesOrderStore.js:    return salesOrderRepository.replaceAll(salesOrders);
+src/state/salesOrderStore.js:  clearSalesOrders() {
+src/state/salesOrderStore.js:    salesOrderRepository.clear();
+src/components/layout/Sidebar/Sidebar.jsx:            Sales Order
+src/components/layout/Sidebar/Sidebar.jsx:            Payment
+src/components/layout/Sidebar/Sidebar.jsx:            Customer
+src/components/layout/Sidebar/Sidebar.jsx:            Product
+src/components/layout/Sidebar/Sidebar.jsx:            Work Order
+src/components/layout/Sidebar/Sidebar.jsx:            Production
+src/application/payments/createPayment.js:import { getNextPaymentNumber } from "../../domain/payments/paymentEngine.js";
+src/application/payments/createPayment.js:export function createPayment({
+src/application/payments/createPayment.js:  const existingPayments = paymentStore.getPayments();
+src/application/payments/createPayment.js:    paymentNumber: getNextPaymentNumber(existingPayments),
+src/application/payments/createPayment.js:  return paymentStore.addPayment(payment);
+src/application/sales-orders/createSalesOrder.js:import { createSalesOrder as buildSalesOrder } from "../../domain/sales-order/salesOrder.js";
+src/application/sales-orders/createSalesOrder.js:import { salesOrderRepository } from "../../repositories/salesOrders/salesOrderRepository.js";
+src/application/sales-orders/createSalesOrder.js:import { createPayment } from "../payments/createPayment.js";
+src/application/sales-orders/createSalesOrder.js:function generateSONumber(existingOrders = []) {
+src/application/sales-orders/createSalesOrder.js:  const lastNumber = existingOrders.reduce((max, order) => {
+src/application/sales-orders/createSalesOrder.js:export function createSalesOrder(payload) {
+src/application/sales-orders/createSalesOrder.js:  const existingOrders = salesOrderRepository.getAll();
+src/application/sales-orders/createSalesOrder.js:  const salesOrder = buildSalesOrder(payload);
+src/application/sales-orders/createSalesOrder.js:  salesOrder.soNumber = generateSONumber(existingOrders);
+src/application/sales-orders/createSalesOrder.js:  salesOrderRepository.append(salesOrder);
+src/application/sales-orders/createSalesOrder.js:    paymentRecord = createPayment({
+src/application/sales-orders/createSalesOrder.js:      soNumber: salesOrder.soNumber,
+src/application/sales-orders/createSalesOrder.js:      customer: salesOrder.customer,
+src/application/sales-orders/createSalesOrder.js:      total: salesOrder.grandTotal || 0,
+src/application/sales-orders/createSalesOrder.js:    salesOrder,
+src/domain/payments/paymentConstants.js:// Payment constants — preserve verified business values.
+src/domain/payments/paymentRules.js:// Payment business rules — populate only after source scan.
+src/domain/payments/payment.js:// Payment domain implementation — migrate only after source scan.
+src/domain/payments/paymentEngine.js:function isActivePayment(payment) {
+src/domain/payments/paymentEngine.js:export function getNextPaymentNumber(payments) {
+src/domain/payments/paymentEngine.js:export function calculatePaymentSummary({
+src/domain/payments/paymentEngine.js:  const relatedPayments = payments.filter(
+src/domain/payments/paymentEngine.js:    (payment) => payment.soNumber === soNumber && isActivePayment(payment)
+src/domain/payments/paymentEngine.js:  const totalPaid = relatedPayments.reduce(
+src/domain/payments/paymentEngine.js:    payments: relatedPayments,
+src/domain/payments/paymentEngine.js:export function validatePaymentAmount({ amount, balance }) {
+src/domain/payments/paymentEngine.js:      message: "Payment Amount must be greater than zero.",
+src/domain/payments/paymentEngine.js:      message: "Payment Amount cannot exceed remaining Balance.",
+src/domain/work-order/workOrder.js:export function createWorkOrderFromSalesItem({ salesOrder, item }) {
+src/domain/work-order/workOrder.js:      soNumber: salesOrder.soNumber,
+src/domain/work-order/workOrder.js:      customerId: salesOrder.customer.id,
+src/domain/work-order/workOrder.js:      customerName: salesOrder.customer.name,
+src/domain/work-order/workOrderConstants.js:// Work Order constants — preserve verified business values.
+src/domain/work-order/productionRules.js:// Production rules. RTS → Admin → COMPLETED is a locked business requirement;
+src/domain/product/product.js:// Product domain implementation — migrate only after source scan.
+src/domain/sales-order/salesOrderItem.js:export function createSalesOrderItem({
+src/domain/sales-order/salesOrderRules.js:// Sales Order business rules — populate only after source scan.
+src/domain/sales-order/salesOrder.js:export function createSalesOrder({
+src/domain/sales-order/salesOrderConstants.js:// Sales Order constants — preserve verified business values.
+src/domain/sales-order/salesOrderPricing.js:export function calculateSalesOrderTotal(items = []) {
+src/domain/customer/customer.js:// Customer domain implementation — migrate only after source scan.
