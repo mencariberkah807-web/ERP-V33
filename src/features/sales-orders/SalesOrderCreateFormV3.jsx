@@ -36,6 +36,11 @@ function nextProductId(products) {
   return `PRD-${String(Math.max(0, ...numbers) + 1).padStart(5, "0")}`;
 }
 
+function nextCategoryId(categories) {
+  const numbers = categories.map((category) => Number(String(category.categoryId ?? "").match(/^CAT-(\d+)$/)?.[1] || 0));
+  return `CAT-${String(Math.max(0, ...numbers) + 1).padStart(5, "0")}`;
+}
+
 function itemTotal(item) {
   const quantity = Math.max(Number(item.quantity) || 0, 0);
   const unitPrice = Math.max(Number(item.unitPrice) || 0, 0);
@@ -51,7 +56,7 @@ export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, i
   const isEditing = Boolean(initialOrder);
   const [customers] = useState(() => customerStore.getActiveCustomers());
   const [products, setProducts] = useState(() => productStore.getActiveProducts());
-  const [categories] = useState(() => categoryStore.getCategories().filter((category) => category.status === "Active"));
+  const [categories, setCategories] = useState(() => categoryStore.getCategories().filter((category) => category.status === "Active"));
   const [orderType, setOrderType] = useState(initialOrder?.orderType ?? "DIRECT");
   const [orderDate, setOrderDate] = useState(initialOrder?.orderDate ?? TODAY);
   const [deadline, setDeadline] = useState(initialOrder?.deadline ?? "");
@@ -70,6 +75,9 @@ export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, i
   const [newProduct, setNewProduct] = useState(createEmptyProduct);
   const [productError, setProductError] = useState("");
   const [productTargetItemId, setProductTargetItemId] = useState(null);
+  const [addCategoryOpen, setAddCategoryOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [categoryError, setCategoryError] = useState("");
 
   const selectedCustomer = useMemo(() => customers.find((item) => item.customerId === customerId) ?? null, [customers, customerId]);
   const grandTotal = useMemo(() => items.filter((item) => item.status !== "INACTIVE").reduce((total, item) => total + itemTotal(item), 0), [items]);
@@ -96,6 +104,44 @@ export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, i
   function updateNewProduct(field, value) {
     setNewProduct((current) => ({ ...current, [field]: value }));
     setProductError("");
+  }
+
+  function openAddCategory() {
+    setNewCategoryName("");
+    setCategoryError("");
+    setAddCategoryOpen(true);
+  }
+
+  function closeAddCategory() {
+    setAddCategoryOpen(false);
+    setNewCategoryName("");
+    setCategoryError("");
+  }
+
+  function saveNewCategory() {
+    const cleanName = newCategoryName.trim();
+    if (!cleanName) {
+      setCategoryError("Category Name is required.");
+      return;
+    }
+
+    const allCategories = categoryStore.getCategories();
+    const duplicate = allCategories.find((category) => category.categoryName?.trim().toLowerCase() === cleanName.toLowerCase());
+    if (duplicate) {
+      setCategoryError("Category already exists.");
+      return;
+    }
+
+    const newCategory = {
+      categoryId: nextCategoryId(allCategories),
+      categoryName: cleanName,
+      status: "Active",
+    };
+    const nextCategories = [...allCategories, newCategory];
+    categoryStore.replaceCategories(nextCategories);
+    setCategories(nextCategories.filter((category) => category.status === "Active"));
+    setNewProduct((current) => ({ ...current, categoryId: newCategory.categoryId }));
+    closeAddCategory();
   }
 
   function saveNewProduct(event) {
@@ -255,7 +301,7 @@ export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, i
               <div className="sales-order-grid-2">
                 <Field label="SKU"><input className="ui-input" value={newProduct.sku} onChange={(event) => updateNewProduct("sku", event.target.value)} autoFocus /></Field>
                 <Field label="Product Name"><input className="ui-input" value={newProduct.productName} onChange={(event) => updateNewProduct("productName", event.target.value)} /></Field>
-                <Field label="Category"><select className="ui-input" value={newProduct.categoryId} onChange={(event) => updateNewProduct("categoryId", event.target.value)}><option value="">Select Category...</option>{categories.map((category) => <option key={category.categoryId} value={category.categoryId}>{category.categoryName}</option>)}</select></Field>
+                <Field label="Category"><div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}><select className="ui-input" style={{ flex: 1 }} value={newProduct.categoryId} onChange={(event) => updateNewProduct("categoryId", event.target.value)}><option value="">Select Category...</option>{categories.map((category) => <option key={category.categoryId} value={category.categoryId}>{category.categoryName}</option>)}</select><button type="button" className="sales-order-small-button ui-button-primary" onClick={openAddCategory}>+ Add Category</button></div></Field>
                 <Field label="Unit"><input className="ui-input" value={newProduct.unit} onChange={(event) => updateNewProduct("unit", event.target.value)} /></Field>
                 <Field label="Standard Price"><input className="ui-input" type="number" min="0" value={newProduct.sellingPrice} onChange={(event) => updateNewProduct("sellingPrice", event.target.value)} /></Field>
                 <Field label="Material"><input className="ui-input" value={newProduct.material} onChange={(event) => updateNewProduct("material", event.target.value)} /></Field>
@@ -269,6 +315,19 @@ export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, i
               <Field label="Description" className="sales-order-margin-top"><textarea className="sales-order-textarea" rows="3" value={newProduct.description} onChange={(event) => updateNewProduct("description", event.target.value)} /></Field>
             </div>
             <footer className="sales-order-footer"><button type="button" className="sales-order-secondary-button" onClick={() => setAddProductOpen(false)}>Cancel</button><button type="button" className="ui-button-primary" onClick={saveNewProduct}>Save Product</button></footer>
+          </div>
+        </div>
+      )}
+
+      {addCategoryOpen && (
+        <div role="dialog" aria-modal="true" aria-label="Add Category" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100, padding: 24 }}>
+          <div className="ui-card" style={{ width: "min(460px, 100%)", margin: 0 }}>
+            <div className="sales-order-card-header sales-order-card-header-between"><span>Add Category</span><button type="button" className="sales-order-secondary-button" onClick={closeAddCategory}>Close</button></div>
+            <div className="sales-order-card-body">
+              {categoryError && <div className="sales-order-error">{categoryError}</div>}
+              <Field label="Category Name"><input className="ui-input" value={newCategoryName} onChange={(event) => { setNewCategoryName(event.target.value); setCategoryError(""); }} autoFocus onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); saveNewCategory(); } }} /></Field>
+            </div>
+            <footer className="sales-order-footer"><button type="button" className="sales-order-secondary-button" onClick={closeAddCategory}>Cancel</button><button type="button" className="ui-button-primary" onClick={saveNewCategory}>Save Category</button></footer>
           </div>
         </div>
       )}
