@@ -41,12 +41,6 @@ function itemTotal(item) {
   return Math.max(quantity * unitPrice - discount, 0);
 }
 
-function paymentStatus(total, paid) {
-  if (paid <= 0) return "UNPAID";
-  if (paid >= total) return "PAID";
-  return "PARTIALLY PAID";
-}
-
 export function createSalesOrderFromForm({
   orderType,
   orderDate,
@@ -66,22 +60,18 @@ export function createSalesOrderFromForm({
   const soNumber = nextNumber(existingOrders, "soNumber", "SO");
   const now = new Date().toISOString();
 
-  const normalizedItems = items.map((item, index) => {
-    const total = itemTotal(item);
-
-    return {
-      soItemId: `${soNumber}-ITEM-${String(index + 1).padStart(3, "0")}`,
-      productId: item.productId,
-      quantity: Math.max(Number(item.quantity) || 0, 0),
-      unitPrice: Math.max(Number(item.unitPrice) || 0, 0),
-      discount: Math.max(Number(item.discount) || 0, 0),
-      itemTotal: total,
-      customRequest: Boolean(item.customRequest),
-      productionNotes: item.notes ?? "",
-      artwork: normalizeAttachment(item.attachment),
-      status: "ACTIVE",
-    };
-  });
+  const normalizedItems = items.map((item, index) => ({
+    soItemId: `${soNumber}-ITEM-${String(index + 1).padStart(3, "0")}`,
+    productId: item.productId,
+    quantity: Math.max(Number(item.quantity) || 0, 0),
+    unitPrice: Math.max(Number(item.unitPrice) || 0, 0),
+    discount: Math.max(Number(item.discount) || 0, 0),
+    itemTotal: itemTotal(item),
+    customRequest: Boolean(item.customRequest),
+    productionNotes: item.notes ?? "",
+    artwork: normalizeAttachment(item.attachment),
+    status: "ACTIVE",
+  }));
 
   const grandTotal = normalizedItems.reduce(
     (total, item) => total + item.itemTotal,
@@ -90,7 +80,6 @@ export function createSalesOrderFromForm({
   const paid = Math.max(Number(amountPaid) || 0, 0);
   const isMarketplace = orderType === "MARKETPLACE";
   const effectivePaid = isMarketplace ? grandTotal : paid;
-  const effectivePaymentStatus = paymentStatus(grandTotal, effectivePaid);
 
   const order = {
     id: crypto.randomUUID?.() ?? `${soNumber}-${Date.now()}`,
@@ -118,11 +107,6 @@ export function createSalesOrderFromForm({
         }
       : null,
     items: normalizedItems,
-    paymentSummary: {
-      totalPaid: effectivePaid,
-      balance: Math.max(grandTotal - effectivePaid, 0),
-      status: effectivePaymentStatus,
-    },
     grandTotal,
     createdAt: now,
     updatedAt: now,
@@ -131,26 +115,18 @@ export function createSalesOrderFromForm({
   salesOrderStore.addSalesOrder(order);
 
   if (isMarketplace || paid > 0) {
-    const paymentNumber = nextNumber(
-      existingPayments,
-      "paymentNumber",
-      "PAY"
-    );
+    const paymentNumber = nextNumber(existingPayments, "paymentNumber", "PAY");
 
     paymentStore.addPayment({
       paymentNumber,
       paymentDate: orderDate,
       soNumber,
       customer: customer?.displayName ?? marketplaceCustomer ?? "",
-      customerDisplayName:
-        customer?.displayName ?? marketplaceCustomer ?? "",
+      customerDisplayName: customer?.displayName ?? marketplaceCustomer ?? "",
       amount: effectivePaid,
       paymentMethod: isMarketplace ? "Transfer" : paymentMethod,
-      referenceNumber: isMarketplace
-        ? trackingNumber || paymentReference
-        : paymentReference,
+      referenceNumber: isMarketplace ? trackingNumber || paymentReference : paymentReference,
       source: isMarketplace ? "MARKETPLACE_AUTO" : "MANUAL",
-      status: effectivePaymentStatus,
       createdAt: now,
     });
   }
