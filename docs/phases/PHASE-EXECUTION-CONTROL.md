@@ -2,77 +2,48 @@
 
 ## PURPOSE
 
-This document is the authoritative execution control for the V3.3 phase system.
-
-Its purpose is to prevent the project from restarting completed analysis, repeating repository scans, or waiting indefinitely for manual approval between implementation phases.
+Authoritative execution control for V3.3. Completed phases are historical authority; they are never restarted merely because a new chat/session begins.
 
 ## CURRENT PROJECT STATE
 
 - PHASE 00: COMPLETE
-- PHASE 01: COMPLETE — source/legacy scan is historical baseline only
+- PHASE 01: COMPLETE — historical source/legacy scan baseline only
 - PHASE 02: COMPLETE — Business Requirement SSOT APPROVED
 - PHASE 03: COMPLETE — Global System Architecture
 - PHASE 04: COMPLETE — Database & Backend Architecture
-- CURRENT EXECUTION PHASE: PHASE 05
+- PHASE 05: COMPLETE — API Contract
+- CURRENT EXECUTION PHASE: PHASE 06
 - TARGET: complete ERP V3.3 through PHASE 20 and final release
 
 ## NON-LOOP RULE
 
-Completed phases are NEVER restarted merely because a new chat/session begins.
-
-A new session MUST:
-
-1. Read this control document.
-2. Read AGENTS.md.
-3. Determine CURRENT EXECUTION PHASE.
-4. Continue from CURRENT EXECUTION PHASE.
-5. Reuse completed phase outputs as authority.
-6. Do NOT repeat PHASE 00 or PHASE 01 scans unless a concrete validation failure explicitly requires a targeted re-scan.
+A new session MUST read this control document, read AGENTS.md, determine CURRENT EXECUTION PHASE, and continue from that phase. It must reuse completed outputs and must not repeat PHASE 00/01 scans unless a concrete validation failure requires a targeted re-scan.
 
 A repository scan is not a phase-reset mechanism.
 
 ## PHASE ADVANCEMENT RULE
 
-The project advances monotonically:
+`PHASE N → VALIDATE → MARK COMPLETE → PHASE N+1`
 
-PHASE N → VALIDATE → MARK COMPLETE → PHASE N+1
-
-Never:
-
-PHASE N → restart PHASE 01 → restart PHASE 02 → wait for approval
-
-unless an explicit Product Owner decision changes an already-approved requirement.
+Never restart an earlier phase unless an explicit Product Owner decision changes an approved requirement.
 
 ## EXECUTION MODE
 
 For each active phase:
 
-READ → SCOPE → IMPLEMENT / PRODUCE REQUIRED OUTPUT → VALIDATE → RECORD RESULT → ADVANCE
+`READ → SCOPE → IMPLEMENT / PRODUCE REQUIRED OUTPUT → VALIDATE → RECORD RESULT → ADVANCE`
 
-The assistant may inspect the repository as much as technically necessary during the active phase. Such inspection is implementation work, not a request to restart the historical deep scan.
+Inspection necessary to execute the current phase is implementation work, not a restart of historical scanning.
 
 ## APPROVAL RULE
 
-Product Owner approval is required only when a genuinely NEW business/product/design decision is required that is not covered by the approved V3 baseline.
+Approval is required only for a genuinely new business/product/design decision outside the approved V3 baseline. Do not ask for generic approval between phases. Do not stop merely because an old phase document contains `STOP FOR APPROVAL` or `Do not implement`; those historical prompt endings are superseded by this execution-control document.
 
-Do NOT ask for approval for:
-
-- implementing an already-approved rule;
-- choosing ordinary implementation details within an approved architecture;
-- fixing bugs discovered while implementing the approved scope;
-- progressing to the next phase after validation;
-- repeating a completed scan;
-- documenting implementation results.
-
-If an unresolved Open Decision from PHASE 02 is encountered, use the narrowest necessary decision point. Do not restart PHASE 01.
+If an unresolved PHASE 02 Open Decision is actually encountered, stop only at that narrow decision boundary and then resume the same phase. Never reset earlier phases.
 
 ## PHASE 02 AUTHORITY
 
-The approved PHASE 02 business baseline is authoritative.
-
-The 24 approved business rules remain in force.
-
-The 11 listed Open Decisions remain open and must not be silently invented. They are decision points only when implementation actually depends on them.
+The approved PHASE 02 business baseline remains authoritative. The 24 approved business rules remain in force. The 11 Open Decisions remain open and must not be silently invented.
 
 ## IMPLEMENTATION PHASES
 
@@ -80,8 +51,8 @@ The 11 listed Open Decisions remain open and must not be silently invented. They
 
 03 Global System Architecture — COMPLETE
 04 Database & Backend Architecture — COMPLETE
-05 API Contract — CURRENT
-06 Frontend Architecture
+05 API Contract — COMPLETE
+06 Frontend Architecture — CURRENT
 07 UI/UX Design System
 
 ### Core Implementation
@@ -105,71 +76,28 @@ The 11 listed Open Decisions remain open and must not be silently invented. They
 
 ## PHASE COMPLETION RECORD
 
-A phase is complete when:
+A phase is complete when its required output/work is present, relevant validation has passed, no blocking issue remains, and the result is recorded. Then CURRENT EXECUTION PHASE advances immediately to the next phase.
 
-- required output/work is present;
-- relevant validation has passed;
-- no blocking issue remains for that phase;
-- the result is recorded in the repository or implementation report;
-- CURRENT EXECUTION PHASE advances to the next phase.
+## COMPLETION RECORD — PHASE 03
 
-A phase does NOT remain "current" simply because the original phase prompt says STOP FOR APPROVAL.
+Produced and validated `docs/phases/PHASE-03-ARCHITECTURE-CONTRACT.md` covering the Presentation → Application → Domain → Repository → Infrastructure boundaries, repository ports, application use cases, state ownership, validation/error boundaries, integration boundary, and migration strategy.
 
-## LEGACY PROMPT OVERRIDE
+## COMPLETION RECORD — PHASE 04
 
-Older phase documents may contain wording such as:
+Produced and validated `docs/phases/PHASE-04-DATABASE-BACKEND-ARCHITECTURE-CONTRACT.md` covering relational model, PK/FK, indexes/constraints, status fields, audit strategy, transaction boundaries, backend/service structure, repository interfaces, validation/authorization/error handling, payment calculation authority, and migration strategy.
 
-- "Jangan coding"
-- "Do not implement"
-- "STOP"
-- "WAIT FOR APPROVAL"
+## COMPLETION RECORD — PHASE 05
 
-Those statements are historical prompt wording and are superseded by this execution-control document once the relevant prerequisite phase has been approved and the project has entered implementation.
+Produced and validated `docs/phases/PHASE-05-API-CONTRACT-OUTPUT.md` against the approved V3.3 business baseline and prior architecture contracts. The contract defines `/api/v1`, resource groups, request/response conventions, validation/error model, authorization boundaries, idempotency, pagination/filtering/sorting, atomic commands, and explicit protection of the approved SO/WO, payment, production, packing, RTS, handover, completion, and cancellation invariants.
 
-The phase document still defines WHAT must be achieved. This document defines HOW the project progresses.
+PHASE 05 is complete. The project advances immediately to PHASE 06.
 
-## NO SILENT BUSINESS INVENTION
+## PHASE 06 START CONDITION
 
-Execution autonomy does not authorize invention of business rules.
+PHASE 06 is authorized to begin immediately because PHASE 05 is complete.
 
-If implementation reaches a genuine business ambiguity:
-
-1. identify the exact decision;
-2. preserve existing approved behavior;
-3. make the smallest safe technical boundary;
-4. request only that specific Product Owner decision;
-5. resume the same phase after the decision.
-
-Do not reset the project.
-
-## PHASE 03 COMPLETION
-
-PHASE 03 produced and validated the Global System Architecture contract at:
-
-`docs/phases/PHASE-03-ARCHITECTURE-CONTRACT.md`
-
-The architecture establishes the Presentation → Application → Domain → Repository → Infrastructure boundaries, repository ports, application use cases, state ownership, validation/error boundaries, integration boundary, migration strategy, and architecture decisions required by the Phase 03 specification.
-
-PHASE 03 is complete.
-
-## PHASE 04 COMPLETION
-
-PHASE 04 produced and validated the Database & Backend Architecture contract at:
-
-`docs/phases/PHASE-04-DATABASE-BACKEND-ARCHITECTURE-CONTRACT.md`
-
-The contract defines the relational model, primary/foreign keys, indexes, constraints, status fields, audit strategy, atomic transaction boundaries, backend structure, service boundaries, repository interfaces, validation/authorization/error handling, single authoritative payment calculation, and migration strategy required by Phase 04.
-
-PHASE 04 is complete. The project advances immediately to PHASE 05.
-
-## PHASE 05 START CONDITION
-
-PHASE 05 is authorized to begin immediately because PHASE 04 is complete.
-
-PHASE 05 must produce the API Contract required by its phase document, validate it against the approved V3.3 business baseline, PHASE 03 architecture contract, PHASE 04 database/backend contract, and AGENTS.md, then advance to PHASE 06 without requiring a new generic approval step.
+PHASE 06 must produce the Frontend Architecture required by its phase specification and align it with the approved V3.3 business baseline, PHASE 03 architecture, PHASE 04 backend contract, PHASE 05 API contract, and AGENTS.md. Validate the result and advance to PHASE 07 without generic approval.
 
 ## FINAL OBJECTIVE
 
-The phase system exists to drive the repository to a working, validated ERP V3.3 release.
-
-It is an execution roadmap, not a perpetual analysis loop.
+This phase system exists to drive the repository to a working, validated ERP V3.3 release. It is an execution roadmap, not a perpetual analysis loop.
