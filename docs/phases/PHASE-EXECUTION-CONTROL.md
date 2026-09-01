@@ -12,7 +12,8 @@ Its purpose is to prevent the project from restarting completed analysis, repeat
 - PHASE 01: COMPLETE — source/legacy scan is historical baseline only
 - PHASE 02: COMPLETE — Business Requirement SSOT APPROVED
 - PHASE 03: COMPLETE — Global System Architecture
-- CURRENT EXECUTION PHASE: PHASE 04
+- PHASE 04: COMPLETE — Database & Backend Architecture
+- CURRENT EXECUTION PHASE: PHASE 05
 - TARGET: complete ERP V3.3 through PHASE 20 and final release
 
 ## NON-LOOP RULE
@@ -78,8 +79,8 @@ The 11 listed Open Decisions remain open and must not be silently invented. They
 ### Architecture / Contract
 
 03 Global System Architecture — COMPLETE
-04 Database & Backend Architecture — CURRENT
-05 API Contract
+04 Database & Backend Architecture — COMPLETE
+05 API Contract — CURRENT
 06 Frontend Architecture
 07 UI/UX Design System
 
@@ -149,13 +150,23 @@ PHASE 03 produced and validated the Global System Architecture contract at:
 
 The architecture establishes the Presentation → Application → Domain → Repository → Infrastructure boundaries, repository ports, application use cases, state ownership, validation/error boundaries, integration boundary, migration strategy, and architecture decisions required by the Phase 03 specification.
 
-PHASE 03 is complete. The project advances immediately to PHASE 04.
+PHASE 03 is complete.
 
-## PHASE 04 START CONDITION
+## PHASE 04 COMPLETION
 
-PHASE 04 is authorized to begin immediately because PHASE 03 is complete.
+PHASE 04 produced and validated the Database & Backend Architecture contract at:
 
-PHASE 04 must produce the Database & Backend Architecture required by its phase document, validate it against the approved V3.3 business baseline, PHASE 03 architecture contract, and AGENTS.md, then advance to PHASE 05 without requiring a new generic approval step.
+`docs/phases/PHASE-04-DATABASE-BACKEND-ARCHITECTURE-CONTRACT.md`
+
+The contract defines the relational model, primary/foreign keys, indexes, constraints, status fields, audit strategy, atomic transaction boundaries, backend structure, service boundaries, repository interfaces, validation/authorization/error handling, single authoritative payment calculation, and migration strategy required by Phase 04.
+
+PHASE 04 is complete. The project advances immediately to PHASE 05.
+
+## PHASE 05 START CONDITION
+
+PHASE 05 is authorized to begin immediately because PHASE 04 is complete.
+
+PHASE 05 must produce the API Contract required by its phase document, validate it against the approved V3.3 business baseline, PHASE 03 architecture contract, PHASE 04 database/backend contract, and AGENTS.md, then advance to PHASE 06 without requiring a new generic approval step.
 
 ## FINAL OBJECTIVE
 
