@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 
 import { customerStore } from "../../state/customerStore.js";
 import { productStore } from "../../state/productStore.js";
+import { categoryStore } from "../../state/categoryStore.js";
 import { createSalesOrderFromForm, updateSalesOrderFromForm } from "./services/salesOrderService.js";
 
 const TODAY = new Date().toISOString().split("T")[0];
@@ -26,6 +27,15 @@ function createItem(source = null) {
     : { id: `${Date.now()}-${Math.random()}`, productId: "", quantity: 1, unitPrice: "", discount: "", notes: "", customRequest: false, attachment: null, artwork: null, status: "ACTIVE" };
 }
 
+function createEmptyProduct() {
+  return { sku: "", productName: "", categoryId: "", unit: "pcs", sellingPrice: "", material: "", specification: "", color: "", thickness: "", length: "", width: "", height: "", description: "", image: "" };
+}
+
+function nextProductId(products) {
+  const numbers = products.map((product) => Number(String(product.productId ?? "").match(/^PRD-(\d+)$/)?.[1] || 0));
+  return `PRD-${String(Math.max(0, ...numbers) + 1).padStart(5, "0")}`;
+}
+
 function itemTotal(item) {
   const quantity = Math.max(Number(item.quantity) || 0, 0);
   const unitPrice = Math.max(Number(item.unitPrice) || 0, 0);
@@ -40,7 +50,8 @@ function formatIDR(value) {
 export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, initialOrder = null }) {
   const isEditing = Boolean(initialOrder);
   const [customers] = useState(() => customerStore.getActiveCustomers());
-  const [products] = useState(() => productStore.getActiveProducts());
+  const [products, setProducts] = useState(() => productStore.getActiveProducts());
+  const [categories] = useState(() => categoryStore.getCategories().filter((category) => category.status === "Active"));
   const [orderType] = useState(initialOrder?.orderType ?? "DIRECT");
   const [orderDate, setOrderDate] = useState(initialOrder?.orderDate ?? TODAY);
   const [deadline, setDeadline] = useState(initialOrder?.deadline ?? "");
@@ -55,6 +66,10 @@ export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, i
   const [paymentReference, setPaymentReference] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [addProductOpen, setAddProductOpen] = useState(false);
+  const [newProduct, setNewProduct] = useState(createEmptyProduct);
+  const [productError, setProductError] = useState("");
+  const [productTargetItemId, setProductTargetItemId] = useState(null);
 
   const selectedCustomer = useMemo(() => customers.find((item) => item.customerId === customerId) ?? null, [customers, customerId]);
   const grandTotal = useMemo(() => items.filter((item) => item.status !== "INACTIVE").reduce((total, item) => total + itemTotal(item), 0), [items]);
@@ -69,6 +84,58 @@ export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, i
     const product = products.find((item) => item.productId === productId);
     setItems((current) => current.map((item) => item.id === id ? { ...item, productId, unitPrice: product?.sellingPrice ?? item.unitPrice } : item));
     setError("");
+  }
+
+  function openAddProduct(itemId) {
+    setProductTargetItemId(itemId);
+    setNewProduct(createEmptyProduct());
+    setProductError("");
+    setAddProductOpen(true);
+  }
+
+  function updateNewProduct(field, value) {
+    setNewProduct((current) => ({ ...current, [field]: value }));
+    setProductError("");
+  }
+
+  function saveNewProduct(event) {
+    event.preventDefault();
+    const sku = newProduct.sku.trim();
+    const productName = newProduct.productName.trim();
+    const unit = newProduct.unit.trim();
+    if (!sku) return setProductError("SKU is required.");
+    if (!productName) return setProductError("Product Name is required.");
+    if (!newProduct.categoryId) return setProductError("Category is required.");
+    if (!unit) return setProductError("Unit is required.");
+    const duplicate = products.find((product) => product.sku?.trim().toLowerCase() === sku.toLowerCase() || product.productName?.trim().toLowerCase() === productName.toLowerCase());
+    if (duplicate) return setProductError("SKU or Product Name already exists.");
+
+    const product = {
+      productId: nextProductId(productStore.getProducts()),
+      sku,
+      productName,
+      categoryId: newProduct.categoryId,
+      unit,
+      costPrice: 0,
+      sellingPrice: Number(newProduct.sellingPrice || 0),
+      status: "Active",
+      material: newProduct.material.trim(),
+      specification: newProduct.specification.trim(),
+      color: newProduct.color.trim(),
+      thickness: newProduct.thickness,
+      length: newProduct.length,
+      width: newProduct.width,
+      height: newProduct.height,
+      description: newProduct.description.trim(),
+      image: newProduct.image,
+    };
+
+    const nextProducts = [...productStore.getProducts(), product];
+    productStore.replaceProducts(nextProducts);
+    setProducts(nextProducts.filter((entry) => entry.status === "Active"));
+    if (productTargetItemId) handleProductChange(productTargetItemId, product.productId);
+    setAddProductOpen(false);
+    setProductTargetItemId(null);
   }
 
   function validate() {
@@ -95,15 +162,11 @@ export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, i
       setError(validationError);
       return;
     }
-
     setSaving(true);
     setError("");
     try {
       const payload = { orderType, orderDate, deadline, priority, customer: selectedCustomer, marketplace, marketplaceCustomer, trackingNumber, items, amountPaid, paymentMethod, paymentReference };
-      const order = isEditing
-        ? updateSalesOrderFromForm(initialOrder.id, payload)
-        : createSalesOrderFromForm(payload);
-
+      const order = isEditing ? updateSalesOrderFromForm(initialOrder.id, payload) : createSalesOrderFromForm(payload);
       if (isEditing) onSaved?.(order);
       else onCreated?.(order);
     } catch (saveError) {
@@ -142,10 +205,7 @@ export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, i
             <div className="sales-order-card-header">Customer Information</div>
             <div className="sales-order-card-body">
               <Field label="Customer"><select className="ui-input" value={customerId} onChange={(event) => setCustomerId(event.target.value)}><option value="">Select Customer...</option>{customers.map((customer) => <option key={customer.customerId} value={customer.customerId}>{customer.displayName || customer.customerName}</option>)}</select></Field>
-              <div className="sales-order-grid-2 sales-order-margin-top">
-                <Field label="Mobile"><input className="ui-input" value={selectedCustomer?.mobile || ""} readOnly /></Field>
-                <Field label="Email"><input className="ui-input" value={selectedCustomer?.email || ""} readOnly /></Field>
-              </div>
+              <div className="sales-order-grid-2 sales-order-margin-top"><Field label="Mobile"><input className="ui-input" value={selectedCustomer?.mobile || ""} readOnly /></Field><Field label="Email"><input className="ui-input" value={selectedCustomer?.email || ""} readOnly /></Field></div>
               <Field label="Address" className="sales-order-margin-top"><textarea className="sales-order-textarea" rows="2" value={selectedCustomer?.address || ""} readOnly /></Field>
             </div>
           </section>
@@ -169,17 +229,10 @@ export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, i
             <div className={`sales-order-item ${item.status === "INACTIVE" ? "sales-order-item-inactive" : ""}`} key={item.id}>
               <div className="sales-order-item-main">
                 <div className="sales-order-grid-2">
-                  <Field label="Product"><select className="ui-input" value={item.productId} disabled={item.status === "INACTIVE"} onChange={(event) => handleProductChange(item.id, event.target.value)}><option value="">Select Product...</option>{products.map((product) => <option key={product.productId} value={product.productId}>{product.productName} {product.sku ? `(${product.sku})` : ""}</option>)}</select></Field>
-                  <div className="sales-order-grid-3">
-                    <Field label="Quantity"><input className="ui-input" type="number" min="1" disabled={item.status === "INACTIVE"} value={item.quantity} onChange={(event) => updateItem(item.id, "quantity", event.target.value)} /></Field>
-                    <Field label="Unit Price"><input className="ui-input" type="number" min="0" disabled={item.status === "INACTIVE"} value={item.unitPrice} onChange={(event) => updateItem(item.id, "unitPrice", event.target.value)} /></Field>
-                    <Field label="Discount"><input className="ui-input" type="number" min="0" disabled={item.status === "INACTIVE"} value={item.discount} onChange={(event) => updateItem(item.id, "discount", event.target.value)} /></Field>
-                  </div>
+                  <Field label="Product"><div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}><select className="ui-input" style={{ flex: 1 }} value={item.productId} disabled={item.status === "INACTIVE"} onChange={(event) => handleProductChange(item.id, event.target.value)}><option value="">Select Product...</option>{products.map((product) => <option key={product.productId} value={product.productId}>{product.productName} {product.sku ? `(${product.sku})` : ""}</option>)}</select><button type="button" className="sales-order-small-button ui-button-primary" disabled={item.status === "INACTIVE"} onClick={() => openAddProduct(item.id)}>+ Add Product</button></div></Field>
+                  <div className="sales-order-grid-3"><Field label="Quantity"><input className="ui-input" type="number" min="1" disabled={item.status === "INACTIVE"} value={item.quantity} onChange={(event) => updateItem(item.id, "quantity", event.target.value)} /></Field><Field label="Unit Price"><input className="ui-input" type="number" min="0" disabled={item.status === "INACTIVE"} value={item.unitPrice} onChange={(event) => updateItem(item.id, "unitPrice", event.target.value)} /></Field><Field label="Discount"><input className="ui-input" type="number" min="0" disabled={item.status === "INACTIVE"} value={item.discount} onChange={(event) => updateItem(item.id, "discount", event.target.value)} /></Field></div>
                 </div>
-                <div className="sales-order-item-extra">
-                  <Field label="Production Notes / Special Request"><textarea className="sales-order-textarea" rows="2" disabled={item.status === "INACTIVE"} value={item.notes} onChange={(event) => updateItem(item.id, "notes", event.target.value)} /></Field>
-                  <Field label="Artwork"><input className="sales-order-file" type="file" disabled={item.status === "INACTIVE"} onChange={(event) => updateItem(item.id, "attachment", event.target.files?.[0] || null)} />{item.artwork?.name && <span className="sales-order-file-name">Current: {item.artwork.name}</span>}</Field>
-                </div>
+                <div className="sales-order-item-extra"><Field label="Production Notes / Special Request"><textarea className="sales-order-textarea" rows="2" disabled={item.status === "INACTIVE"} value={item.notes} onChange={(event) => updateItem(item.id, "notes", event.target.value)} /></Field><Field label="Artwork"><input className="sales-order-file" type="file" disabled={item.status === "INACTIVE"} onChange={(event) => updateItem(item.id, "attachment", event.target.files?.[0] || null)} />{item.artwork?.name && <span className="sales-order-file-name">Current: {item.artwork.name}</span>}</Field></div>
                 <label className="sales-order-checkbox"><input type="checkbox" disabled={item.status === "INACTIVE"} checked={item.customRequest} onChange={(event) => updateItem(item.id, "customRequest", event.target.checked)} />Custom / Special Request</label>
               </div>
               <div className="sales-order-item-total"><Field label="Item Total"><input className="ui-input" value={formatIDR(itemTotal(item))} readOnly /></Field>{items.length > 1 && item.status !== "INACTIVE" && <button type="button" className="sales-order-remove-button" onClick={() => setItems((current) => current.filter((entry) => entry.id !== item.id))}>Remove Item</button>}</div>
@@ -189,10 +242,36 @@ export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, i
       </section>
 
       {!isEditing && orderType === "DIRECT" && <section className="ui-card"><div className="sales-order-card-header">Payment</div><div className="sales-order-card-body"><div className="sales-order-grid-3"><Field label="Grand Total"><input className="ui-input" value={formatIDR(grandTotal)} readOnly /></Field><Field label="Amount Paid"><input className="ui-input" type="number" min="0" value={amountPaid} onChange={(event) => setAmountPaid(event.target.value)} /></Field><Field label="Balance"><input className="ui-input" value={formatIDR(balance)} readOnly /></Field></div><div className="sales-order-payment-method sales-order-margin-top"><strong>Payment Method</strong>{["Cash", "Transfer", "QRIS"].map((value) => <label className="sales-order-payment-radio" key={value}><input type="radio" name="paymentMethod" value={value} checked={paymentMethod === value} onChange={() => setPaymentMethod(value)} />{value}</label>)}<input className="ui-input sales-order-payment-reference" value={paymentReference} onChange={(event) => setPaymentReference(event.target.value)} placeholder="Payment reference" /></div></div></section>}
-
       {isEditing && <section className="ui-card"><div className="sales-order-card-header">Payment</div><div className="sales-order-card-body"><div className="sales-order-payment-auto-note">Payment history is preserved and is not edited from Sales Order. Use the Payment domain for payment transactions.</div></div></section>}
 
       <footer className="sales-order-footer"><button type="button" className="sales-order-secondary-button" onClick={onCancel}>Cancel</button><button type="submit" className="ui-button-primary" disabled={saving}>{saving ? "Saving..." : isEditing ? "Save Changes" : orderType === "MARKETPLACE" ? "Create WO" : "Create Order"}</button></footer>
+
+      {addProductOpen && (
+        <div role="dialog" aria-modal="true" aria-label="Add Product" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.35)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 24 }}>
+          <div className="ui-card" style={{ width: "min(760px, 100%)", maxHeight: "90vh", overflow: "auto", margin: 0 }}>
+            <div className="sales-order-card-header sales-order-card-header-between"><span>Add Product</span><button type="button" className="sales-order-secondary-button" onClick={() => setAddProductOpen(false)}>Close</button></div>
+            <div className="sales-order-card-body">
+              {productError && <div className="sales-order-error">{productError}</div>}
+              <div className="sales-order-grid-2">
+                <Field label="SKU"><input className="ui-input" value={newProduct.sku} onChange={(event) => updateNewProduct("sku", event.target.value)} autoFocus /></Field>
+                <Field label="Product Name"><input className="ui-input" value={newProduct.productName} onChange={(event) => updateNewProduct("productName", event.target.value)} /></Field>
+                <Field label="Category"><select className="ui-input" value={newProduct.categoryId} onChange={(event) => updateNewProduct("categoryId", event.target.value)}><option value="">Select Category...</option>{categories.map((category) => <option key={category.categoryId} value={category.categoryId}>{category.categoryName}</option>)}</select></Field>
+                <Field label="Unit"><input className="ui-input" value={newProduct.unit} onChange={(event) => updateNewProduct("unit", event.target.value)} /></Field>
+                <Field label="Standard Price"><input className="ui-input" type="number" min="0" value={newProduct.sellingPrice} onChange={(event) => updateNewProduct("sellingPrice", event.target.value)} /></Field>
+                <Field label="Material"><input className="ui-input" value={newProduct.material} onChange={(event) => updateNewProduct("material", event.target.value)} /></Field>
+                <Field label="Specification"><input className="ui-input" value={newProduct.specification} onChange={(event) => updateNewProduct("specification", event.target.value)} /></Field>
+                <Field label="Color"><input className="ui-input" value={newProduct.color} onChange={(event) => updateNewProduct("color", event.target.value)} /></Field>
+                <Field label="Thickness"><input className="ui-input" value={newProduct.thickness} onChange={(event) => updateNewProduct("thickness", event.target.value)} /></Field>
+                <Field label="Length"><input className="ui-input" value={newProduct.length} onChange={(event) => updateNewProduct("length", event.target.value)} /></Field>
+                <Field label="Width"><input className="ui-input" value={newProduct.width} onChange={(event) => updateNewProduct("width", event.target.value)} /></Field>
+                <Field label="Height"><input className="ui-input" value={newProduct.height} onChange={(event) => updateNewProduct("height", event.target.value)} /></Field>
+              </div>
+              <Field label="Description" className="sales-order-margin-top"><textarea className="sales-order-textarea" rows="3" value={newProduct.description} onChange={(event) => updateNewProduct("description", event.target.value)} /></Field>
+            </div>
+            <footer className="sales-order-footer"><button type="button" className="sales-order-secondary-button" onClick={() => setAddProductOpen(false)}>Cancel</button><button type="button" className="ui-button-primary" onClick={saveNewProduct}>Save Product</button></footer>
+          </div>
+        </div>
+      )}
     </form>
   );
 }
