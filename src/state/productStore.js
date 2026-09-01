@@ -1,3 +1,4 @@
+import { assertProductCollection } from "../domain/product/product.js";
 import { productRepository } from "../repositories/products/productRepository.js";
 
 export const productStore = {
@@ -12,6 +13,7 @@ export const productStore = {
   },
 
   replaceProducts(products) {
+    assertProductCollection(products);
     return productRepository.replaceAll(products);
   },
 
