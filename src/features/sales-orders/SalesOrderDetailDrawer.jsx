@@ -1,16 +1,35 @@
+import { useState } from "react";
+
 import { paymentStore } from "../../state/paymentStore.js";
+import { cancelSalesOrder } from "./services/salesOrderService.js";
 
 function formatIDR(value) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(value || 0));
 }
 
-export default function SalesOrderDetailDrawer({ order, onClose }) {
+const PRE_PRODUCTION_STATUSES = new Set(["NEW ORDER", "READY PRODUCTION"]);
+
+export default function SalesOrderDetailDrawer({ order, onClose, onEdit, onCancelled }) {
+  const [actionError, setActionError] = useState("");
   if (!order) return null;
 
   const payments = paymentStore.getPaymentsBySO(order.soNumber);
   const totalPaid = payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
   const balance = Math.max(Number(order.grandTotal || 0) - totalPaid, 0);
   const paymentStatus = totalPaid <= 0 ? "UNPAID" : totalPaid >= Number(order.grandTotal || 0) ? "PAID" : "PARTIALLY PAID";
+  const canEdit = PRE_PRODUCTION_STATUSES.has(order.status);
+  const canCancel = PRE_PRODUCTION_STATUSES.has(order.status);
+
+  function handleCancel() {
+    if (!window.confirm(`Cancel ${order.soNumber}? This will mark the Sales Order INACTIVE and preserve its history.`)) return;
+
+    try {
+      const updated = cancelSalesOrder(order.id);
+      onCancelled?.(updated);
+    } catch (error) {
+      setActionError(error?.message || "Sales Order gagal dibatalkan.");
+    }
+  }
 
   return (
     <>
@@ -26,6 +45,13 @@ export default function SalesOrderDetailDrawer({ order, onClose }) {
         </header>
 
         <div className="sales-order-detail-body">
+          {actionError && <div className="sales-order-detail-error">{actionError}</div>}
+
+          <section className="sales-order-detail-section sales-order-detail-actions">
+            {canEdit && <button type="button" className="ui-button-primary" onClick={() => onEdit?.(order)}>Edit</button>}
+            {canCancel && <button type="button" className="sales-order-detail-cancel" onClick={handleCancel}>Cancel Order</button>}
+          </section>
+
           <section className="sales-order-detail-section">
             <h3>Order Information</h3>
             <DetailRow label="Status" value={order.status} />
@@ -47,9 +73,16 @@ export default function SalesOrderDetailDrawer({ order, onClose }) {
           <section className="sales-order-detail-section">
             <h3>Items</h3>
             {order.items.map((item) => (
-              <div className="sales-order-detail-item" key={item.soItemId}>
-                <div><strong>{item.soItemId}</strong><span>Product ID: {item.productId}</span></div>
-                <div><span>Qty {item.quantity}</span><strong>{formatIDR(item.itemTotal)}</strong></div>
+              <div className={`sales-order-detail-item ${item.status === "INACTIVE" ? "sales-order-detail-item-inactive" : ""}`} key={item.soItemId}>
+                <div>
+                  <strong>{item.soItemId}</strong>
+                  <span>Product ID: {item.productId}</span>
+                  <span>Qty {item.quantity} · Unit {formatIDR(item.unitPrice)} · Discount {formatIDR(item.discount)}</span>
+                  {item.customRequest && <span>Custom / Special Request</span>}
+                  {item.productionNotes && <span>Production Notes: {item.productionNotes}</span>}
+                  {item.artwork?.name && <span>Artwork: {item.artwork.name}</span>}
+                </div>
+                <div><span>{item.status}</span><strong>{formatIDR(item.itemTotal)}</strong></div>
               </div>
             ))}
           </section>
@@ -64,7 +97,7 @@ export default function SalesOrderDetailDrawer({ order, onClose }) {
 
           <section className="sales-order-detail-section">
             <h3>Work Orders</h3>
-            <div className="sales-order-detail-empty">WO creation is governed by the Work Order phase. This SO is ready for the next execution step.</div>
+            <div className="sales-order-detail-empty">WO records are owned by the Work Order phase. Direct Order remains NEW ORDER until the explicit Create WO execution step.</div>
           </section>
         </div>
       </aside>
