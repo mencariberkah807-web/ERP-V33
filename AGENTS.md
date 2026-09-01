@@ -19,7 +19,12 @@ Current baseline:
 - PHASE 00 = COMPLETE
 - PHASE 01 = COMPLETE
 - PHASE 02 = COMPLETE / BUSINESS BASELINE APPROVED
-- Next phase = PHASE 03
+- PHASE 03 = COMPLETE
+- PHASE 04 = COMPLETE
+- PHASE 05 = COMPLETE
+- PHASE 06 = COMPLETE
+- PHASE 07 = COMPLETE
+- CURRENT PHASE = PHASE 08
 
 ### NON-LOOP RULE
 
@@ -32,6 +37,8 @@ The project progresses monotonically:
 `PHASE N → IMPLEMENT / PRODUCE → VALIDATE → COMPLETE → PHASE N+1`
 
 Never reset to an earlier phase unless an explicit Product Owner decision changes the approved baseline or a concrete validation failure requires targeted re-investigation.
+
+A repository scan is never a phase-reset mechanism.
 
 ### Approval rule
 
@@ -437,12 +444,12 @@ At the start of a new session:
 PHASE 00  Project Initialization                         COMPLETE
 PHASE 01  Source / Legacy Deep Scan                      COMPLETE
 PHASE 02  Business Requirement SSOT                     APPROVED
-PHASE 03  Global System Architecture                    CURRENT
-PHASE 04  Database & Backend Architecture
-PHASE 05  API Contract
-PHASE 06  Frontend Architecture
-PHASE 07  UI/UX Design System
-PHASE 08  Master Data
+PHASE 03  Global System Architecture                    COMPLETE
+PHASE 04  Database & Backend Architecture               COMPLETE
+PHASE 05  API Contract                                  COMPLETE
+PHASE 06  Frontend Architecture                          COMPLETE
+PHASE 07  UI/UX Design System                            COMPLETE
+PHASE 08  Master Data                                    CURRENT
 PHASE 09  Sales Order
 PHASE 10  Payment
 PHASE 11  Work Order & Production
