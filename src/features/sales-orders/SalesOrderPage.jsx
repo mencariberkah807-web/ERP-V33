@@ -13,6 +13,7 @@ function formatIDR(value) {
 
 export default function SalesOrderPage() {
   const [showNewOrder, setShowNewOrder] = useState(false);
+  const [editingOrder, setEditingOrder] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -31,14 +32,33 @@ export default function SalesOrderPage() {
       .sort((a, b) => String(b.soNumber).localeCompare(String(a.soNumber), undefined, { numeric: true }));
   }, [orders, search, statusFilter]);
 
-  function handleCreated(order) {
+  function refreshOrders() {
     setOrders(salesOrderStore.getSalesOrders());
+  }
+
+  function handleCreated(order) {
+    refreshOrders();
     setShowNewOrder(false);
+    setSelectedOrder(order);
+  }
+
+  function handleSaved(order) {
+    refreshOrders();
+    setEditingOrder(null);
+    setSelectedOrder(order);
+  }
+
+  function handleCancelled(order) {
+    refreshOrders();
     setSelectedOrder(order);
   }
 
   if (showNewOrder) {
     return <SalesOrderCreateFormV3 onCancel={() => setShowNewOrder(false)} onCreated={handleCreated} />;
+  }
+
+  if (editingOrder) {
+    return <SalesOrderCreateFormV3 initialOrder={editingOrder} onCancel={() => setEditingOrder(null)} onSaved={handleSaved} />;
   }
 
   return (
@@ -84,7 +104,17 @@ export default function SalesOrderPage() {
         </div>
       </section>
 
-      {selectedOrder && <SalesOrderDetailDrawer order={selectedOrder} onClose={() => setSelectedOrder(null)} />}
+      {selectedOrder && (
+        <SalesOrderDetailDrawer
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+          onEdit={(order) => {
+            setSelectedOrder(null);
+            setEditingOrder(order);
+          }}
+          onCancelled={handleCancelled}
+        />
+      )}
     </div>
   );
 }
