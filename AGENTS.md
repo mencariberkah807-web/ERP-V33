@@ -2,37 +2,72 @@
 
 ## Project Identity
 
-ARTKRILIK ERP V3 is a production ERP redesign and implementation
-project.
+ARTKRILIK ERP V3.3 is a production ERP redesign and implementation project.
 
-The current project phase is transitioning from locked design into
-controlled implementation.
+The project uses a controlled phase roadmap whose purpose is to reach a validated production release. Completed phases are historical authority and MUST NOT be restarted merely because a new chat/session begins.
 
-**Primary principle:** \> Design decisions are the source of truth.
-Existing code is a baseline/reference, not raw material to redesign
-freely.
+**Primary principle:** Approved V3 design/business decisions are the source of truth. Existing code is a baseline/reference, not raw material to redesign freely.
+
+------------------------------------------------------------------------
+
+## PHASE EXECUTION CONTROL — CRITICAL
+
+Read `docs/phases/PHASE-EXECUTION-CONTROL.md` at the start of every new implementation session.
+
+Current baseline:
+
+- PHASE 00 = COMPLETE
+- PHASE 01 = COMPLETE
+- PHASE 02 = COMPLETE / BUSINESS BASELINE APPROVED
+- Next phase = PHASE 03
+
+### NON-LOOP RULE
+
+Do NOT restart PHASE 00 or PHASE 01 on a new chat/session.
+
+PHASE 01 is a completed historical deep-scan baseline. Repository inspection required by a later implementation task is a **targeted implementation inspection**, not a new PHASE 01 scan.
+
+The project progresses monotonically:
+
+`PHASE N → IMPLEMENT / PRODUCE → VALIDATE → COMPLETE → PHASE N+1`
+
+Never reset to an earlier phase unless an explicit Product Owner decision changes the approved baseline or a concrete validation failure requires targeted re-investigation.
+
+### Approval rule
+
+Do not ask for generic approval between phases.
+
+Approval is required only for a genuinely NEW business/product/design decision that is not already covered by the approved V3.3 baseline.
+
+Approved requirements may be implemented without waiting for another approval.
+
+### Phase prompt wording
+
+Some historical phase documents may contain `Jangan coding`, `Do not implement`, `STOP`, or `WAIT FOR APPROVAL`. Those are historical prompt instructions and are superseded for execution sequencing by `PHASE-EXECUTION-CONTROL.md` once the prerequisite phase is approved.
+
+The phase document defines the required outcome. The execution-control document defines progression.
 
 ------------------------------------------------------------------------
 
 ## Global Change Control
 
-Every implementation task MUST follow:
+For an active implementation task use:
 
-**SCAN → IDENTIFY → PROPOSE → APPROVE → APPLY → VALIDATE**
+**READ → SCOPE → IMPLEMENT → VALIDATE → RECORD → ADVANCE**
+
+Targeted inspection is allowed and expected before implementation. It MUST NOT become a full project re-scan.
 
 Rules:
 
-1.  No approval = no code change when the task requires a new
-    business/design decision.
-2.  Do not silently alter locked business behavior.
-3.  Do not refactor unrelated code during a scoped task.
-4.  Do not redesign an existing locked UI/behavior without explicit
-    approval.
-5.  Keep each implementation task small and independently testable.
-6.  After applying a change, run the relevant application/build/test
-    validation.
-7.  If the current code conflicts with the V3 baseline, report the
-    conflict before changing behavior.
+1. No new business decision may be invented silently.
+2. Do not silently alter locked business behavior.
+3. Do not refactor unrelated code during a scoped task.
+4. Do not redesign an existing locked UI/behavior without explicit approval.
+5. Keep implementation changes scoped and independently testable.
+6. After applying a change, run the relevant application/build/test validation.
+7. If current code conflicts with the approved V3 baseline, correct the implementation toward V3 within the approved scope.
+8. Stop only for a real blocker or a genuinely new decision, not for routine implementation details.
+9. After validation, advance to the next phase/task instead of reopening completed analysis.
 
 ------------------------------------------------------------------------
 
@@ -40,12 +75,11 @@ Rules:
 
 Use this order of authority:
 
-1.  Latest explicitly approved V3 decision in the project
-    conversation/checkpoint.
-2.  Current V3 architecture/baseline documentation.
-3.  Existing V3 code, only where it does not conflict with V3 decisions.
-4.  V2/source code as behavior reference only.
-5.  General assumptions are NOT authoritative.
+1. Latest explicitly approved V3 decision in the project conversation/checkpoint.
+2. Current V3 architecture/baseline documentation.
+3. Existing V3 code, only where it does not conflict with V3 decisions.
+4. V2/source code as behavior reference only.
+5. General assumptions are NOT authoritative.
 
 Never use V2 behavior to override an approved V3 decision.
 
@@ -55,7 +89,7 @@ Never use V2 behavior to override an approved V3 decision.
 
 ## Core Lifecycle
 
-``` text
+```text
 NEW ORDER
    ↓
 READY PRODUCTION
@@ -81,12 +115,12 @@ COMPLETED ORDER
 
 Only:
 
--   Direct Order
--   Marketplace
+- Direct Order
+- Marketplace
 
 ## Direct Order
 
-``` text
+```text
 New Order
 → Direct Order
 → Create Order
@@ -98,7 +132,7 @@ Create Order does NOT automatically create a WO.
 
 ## Marketplace
 
-``` text
+```text
 New Order
 → Marketplace
 → Create WO
@@ -114,30 +148,29 @@ Marketplace payment is automatically recorded as PAID.
 
 Business statuses:
 
--   NEW ORDER
--   READY PRODUCTION
--   IN PRODUCTION
--   PACKING
--   RTS
--   COMPLETED
--   INACTIVE
+- NEW ORDER
+- READY PRODUCTION
+- IN PRODUCTION
+- PACKING
+- RTS
+- COMPLETED
+- INACTIVE
 
 ### Table Badge Labels
 
 Use these short UI labels:
 
-  Business Status    Badge
-  ------------------ -------------
-  NEW ORDER          New Order
-  READY PRODUCTION   Ready WO
-  IN PRODUCTION      In Progress
-  PACKING            Packing
-  RTS                RTS
-  COMPLETED          Completed
-  INACTIVE           Inactive
+| Business Status | Badge |
+|---|---|
+| NEW ORDER | New Order |
+| READY PRODUCTION | Ready WO |
+| IN PRODUCTION | In Progress |
+| PACKING | Packing |
+| RTS | RTS |
+| COMPLETED | Completed |
+| INACTIVE | Inactive |
 
-Badge labels are presentation only. Do not create new business statuses
-from these labels.
+Badge labels are presentation only. Do not create new business statuses from these labels.
 
 ------------------------------------------------------------------------
 
@@ -147,7 +180,7 @@ from these labels.
 
 **Locked relationship:**
 
-``` text
+```text
 1 Active SO Item
         ↓
 1 WO
@@ -155,26 +188,13 @@ from these labels.
 
 Quantity does NOT create additional WOs.
 
-Example:
-
-``` text
-SO-001
-├── Item A → WO-A
-├── Item B → WO-B
-└── Item C → WO-C
-```
-
 ### SO Item Identity
 
-Use:
-
-``` text
-soItemId
-```
+Use `soItemId`.
 
 WO relationship:
 
-``` text
+```text
 SO Number + SO Item ID
 ```
 
@@ -190,14 +210,11 @@ SO Detail uses a **Right Drawer**, not the old JOB Card Modal.
 
 Primary actions:
 
--   Edit
--   Create WO
--   Print
+- Edit
+- Create WO
+- Print
 
 There is NO Save Draft.
-
-After all Active SO Items have a WO, Create WO must not create
-duplicates.
 
 ------------------------------------------------------------------------
 
@@ -205,7 +222,7 @@ duplicates.
 
 Before Production starts:
 
-``` text
+```text
 Admin edits SO
 → SO updates
 → Related WO data syncs
@@ -213,19 +230,17 @@ Admin edits SO
 
 After Production starts:
 
-``` text
+```text
 WO = Production execution authority
 ```
 
-However, Production does NOT become customer/order data authority.
+Production does NOT become customer/order data authority.
 
 ------------------------------------------------------------------------
 
 # CUSTOMER COMMUNICATION
 
-Customer communication is a **single-gate Admin process**.
-
-``` text
+```text
 CUSTOMER
     ↕
   ADMIN
@@ -235,20 +250,15 @@ CUSTOMER
 PRODUCTION
 ```
 
-Production/operators may report issues to Admin.
-
-Production/operators must NOT directly change or negotiate
-customer-facing information.
+Production/operators may report issues to Admin, but must NOT directly change or negotiate customer-facing information.
 
 ------------------------------------------------------------------------
 
 # PRODUCTION AUTHORITY
 
-Production is responsible for execution only.
+Production controls execution state only:
 
-Production actions:
-
-``` text
+```text
 READY PRODUCTION
     ↓ START
 IN PRODUCTION
@@ -256,80 +266,23 @@ IN PRODUCTION
 COMPLETED PRODUCTION
 ```
 
-### Production UI labels
+Processes:
 
-``` text
-Ready Production     [ START ]
-In Production        [ IN PROGRESS ]
-Completed Production [ DONE ]
-```
+- Laser Cutting
+- UV Printing
+- Assembly
+- Laser Marking
+- Finishing
 
-`IN PROGRESS` is a UI label, NOT a separate business status.
+Processes are non-sequential and potentially parallel. Do NOT implement a mandatory sequential routing/stage engine.
 
-------------------------------------------------------------------------
-
-## Production Process
-
-Current processes:
-
--   Laser Cutting
--   UV Printing
--   Assembly
--   Laser Marking
--   Finishing
-
-Production processes are:
-
--   non-sequential
--   potentially parallel
--   dependent on actual production conditions
--   not governed by a mandatory route in V3
-
-Do NOT implement a sequential `Next Production Stage` workflow.
-
-Do NOT add a mandatory production routing/scheduling engine.
-
-**Production Routing / Scheduling is a future module.**
-
-------------------------------------------------------------------------
-
-# PRODUCTION DATA OWNERSHIP
-
-Production can execute production state.
-
-Production cannot edit customer/order/instruction data, including:
-
--   Customer
--   Sales Order
--   SO Item
--   Quantity
--   Price
--   Discount
--   Deadline
--   Artwork
--   Specification
--   Production Notes
--   Customer requests
-
-These remain under Admin authority.
-
-If Production finds an issue:
-
-``` text
-Production
-→ Admin
-→ Admin communicates/reviews with customer
-→ Admin updates ERP if approved
-→ Production receives updated instruction
-```
+Production cannot edit customer/order/instruction data, including Customer, SO, SO Item, Quantity, Price, Discount, Deadline, Artwork, Specification, Production Notes, and Customer requests, unless an explicitly approved exception exists.
 
 ------------------------------------------------------------------------
 
 # WORK ORDER
 
-## Relationship
-
-``` text
+```text
 Sales Order
     ↓
 SO Item
@@ -339,89 +292,25 @@ Work Order
 
 1 Active SO Item = 1 WO.
 
-WO inherits transaction data from SO and SO Item.
-
-WO must NOT ask the user to re-enter data already available from the
-SO/SO Item.
-
-## WO Identity
+WO inherits transaction data from SO and SO Item. Do not force re-entry of existing order data.
 
 WO must contain/reference:
 
--   WO Number
--   SO Number
--   SO Item ID
-
-------------------------------------------------------------------------
-
-# JOB CARD → RIGHT DRAWER
-
-The existing V2 JOB Card is a behavior/content reference.
-
-V3 replaces it with a **Work Order Right Drawer**.
-
-Retain relevant information such as:
-
--   WO Number
--   SO Number
--   Customer
--   Channel
--   Priority
--   Deadline
--   Product
--   Quantity
--   Dimension
--   Material
--   Thickness
--   Color
--   Finishing
--   Special Instruction
--   Artwork
--   Google Drive link
--   Production Process
--   Production Notes
--   Production timeline
-
-Do NOT carry over these V2 behaviors:
-
--   Next Production Stage
--   sequential stage control
--   free stage selector used as sequential workflow
-
-The Right Drawer is both WO Detail and Production Control.
+- WO Number
+- SO Number
+- SO Item ID
 
 ------------------------------------------------------------------------
 
 # PACKING
 
-Packing is a **fulfillment process**, not a Production process.
-
-## Critical rule
+Packing is a fulfillment process, not a Production process.
 
 **Packing lookup is based on Sales Order, NOT Work Order.**
 
-``` text
-PACKING
-   ↓
-Lookup SO
-   ↓
-SO Packing Detail
-   ↓
-All Active Order Items
-```
+All Active Order Items must have completed Production before packing is allowed.
 
-Packing works at SO/customer-order level.
-
-WO is only the source of Production completion state.
-
-------------------------------------------------------------------------
-
-## PACK Gate
-
-All Active Order Items must have completed Production before the SO can
-be packed.
-
-``` text
+```text
 All Active Items
     ↓
 Completed Production
@@ -433,31 +322,13 @@ RTS
 
 ------------------------------------------------------------------------
 
-# RTS
+# RTS / HANDOVER / FINAL COMPLETION
 
-RTS means:
+RTS means Ready to Ship / Ready for Handover. RTS does NOT mean Completed Order.
 
-**Ready to Ship / Ready to hand over**
+Final Order Completion is Admin-controlled:
 
-RTS does NOT mean Completed Order.
-
-``` text
-PACK
- ↓
-RTS
- ↓
-Customer / Courier waiting
-```
-
-------------------------------------------------------------------------
-
-# HANDOVER / FINAL COMPLETION
-
-Final Order Completion is Admin-controlled.
-
-Mandatory gates:
-
-``` text
+```text
 RTS
 +
 HANDOVER
@@ -469,27 +340,15 @@ ADMIN COMPLETE
 COMPLETED ORDER
 ```
 
-Therefore:
-
-``` text
-COMPLETED PRODUCTION
-≠
-COMPLETED ORDER
-```
-
-Payment alone must never automatically complete an Order.
+Therefore `COMPLETED PRODUCTION ≠ COMPLETED ORDER`.
 
 ------------------------------------------------------------------------
 
 # PAYMENT
 
-Payment is record-based.
+Payment is record-based:
 
-Do NOT model payment as a single overwritten Amount Paid field.
-
-Use:
-
-``` text
+```text
 Payment Records
     ↓
 Total Paid
@@ -499,186 +358,112 @@ Balance
 Payment Status
 ```
 
-Payment statuses:
+Statuses:
 
--   UNPAID
--   PARTIALLY PAID
--   PAID
+- UNPAID
+- PARTIALLY PAID
+- PAID
 
-Payment record history must remain preserved.
-
-Marketplace orders create/receive an automatic PAID payment record.
-
-Final Order Completion requires Payment = PAID.
+Payment history must remain preserved. Marketplace orders create/receive an automatic PAID payment record. Payment alone must never automatically complete an Order.
 
 ------------------------------------------------------------------------
 
 # CANCELLATION
 
-Cancellation means:
+Cancellation means `INACTIVE`.
 
-``` text
-INACTIVE
-```
+Never hard delete cancellation-controlled entities.
 
-Never Delete.
+Whole Order:
 
-Whole Order cancellation:
-
-``` text
+```text
 SO → INACTIVE
 ```
 
 Partial cancellation:
 
-``` text
+```text
 SO Item → INACTIVE
 Related WO → INACTIVE
 ```
 
-There is NO Cancel WO button.
-
-Cancellation is allowed only before Production starts.
-
-Inactive WOs/items do not participate in active aggregation.
-
-------------------------------------------------------------------------
-
-# SO AGGREGATION
-
-Sales Order status is an aggregate of its Active WOs plus
-fulfillment/payment conditions.
-
-Examples:
-
-``` text
-Any Active WO in Production
-→ SO = In Progress
-
-All Active WOs Completed Production
-→ SO = Packing
-
-All Active WOs RTS
-→ SO = RTS
-
-RTS + Handover + PAID + Admin Complete
-→ SO = Completed
-```
-
-Inactive WOs are ignored by active aggregation.
-
-SO is the customer transaction unit.
-
-WO is the production execution unit.
+Cancellation is allowed only before Production starts. Inactive WOs/items do not participate in active aggregation.
 
 ------------------------------------------------------------------------
 
 # UI / UX PRINCIPLES
 
-1.  Keep UI concise.
-2.  Use short badge labels.
-3.  Do not expose internal complexity when it does not help the
-    operator.
-4.  Do not introduce unnecessary modals.
-5.  Prefer Right Drawer for detail where already locked.
-6.  Primary actions must use the V3 approved brighter blue CTA
-    treatment, not ARTKRILIK navy.
-7.  Red is reserved for destructive/danger actions, not normal
-    Save/Create/Update/Submit actions.
-8.  Do not introduce Save Draft where V3 explicitly removed it.
-9.  Do not use Delete for cancellation.
+1. Keep UI concise.
+2. Use short badge labels.
+3. Do not expose internal complexity when it does not help the operator.
+4. Do not introduce unnecessary modals.
+5. Prefer Right Drawer for detail where already locked.
+6. Primary actions use the V3 approved brighter blue CTA treatment, not ARTKRILIK navy.
+7. Red is reserved for destructive/error emphasis, not normal Save/Create/Update/Submit actions.
+8. Do not introduce Save Draft where V3 explicitly removed it.
+9. Do not use Delete for cancellation.
 10. Do not over-engineer future modules into the current core engine.
 
 ------------------------------------------------------------------------
 
 # IMPLEMENTATION DISCIPLINE
 
-For every Codex task:
+At the start of a new session:
 
-1.  Read this AGENTS.md first.
-2.  Inspect the relevant existing implementation.
-3.  Scope the task narrowly.
-4.  Do not modify unrelated modules.
-5.  Do not invent business rules.
-6.  Do not silently resolve conflicts.
-7.  If a new business decision is required, STOP and report it.
-8.  Apply only the approved scope.
-9.  Run the relevant validation.
-10. Report exactly what changed and what was validated.
+1. Read `docs/phases/PHASE-EXECUTION-CONTROL.md`.
+2. Read this AGENTS.md.
+3. Determine the current phase from the execution control.
+4. Read ONLY the active phase document and the dependencies needed for that phase.
+5. Reuse completed phase outputs. Do not restart completed scans.
+6. Inspect relevant source files only as required by the active task.
+7. Implement the approved scope.
+8. Validate.
+9. Record the result.
+10. Advance the current phase.
 
-Recommended task pattern:
+### Required behavior when encountering an issue
 
-``` text
-SCAN
-→ IDENTIFY
-→ PROPOSE
-→ APPROVE
-→ APPLY
-→ VALIDATE
-```
-
-Do not combine the entire ERP implementation into one task.
+- **Known implementation conflict:** fix it within the active scope.
+- **Ordinary technical choice:** choose the smallest architecture-consistent solution and proceed.
+- **Genuine business ambiguity:** isolate the exact decision and request only that decision.
+- **Missing legacy file:** record UNKNOWN; never reconstruct it by assumption.
+- **Validation failure:** diagnose and fix; do not restart PHASE 01.
 
 ------------------------------------------------------------------------
 
-# CURRENT IMPLEMENTATION PHASE
+# IMPLEMENTATION ROADMAP
 
-The Sales Order → Work Order → Packing core engine is **design locked**.
-
-Implementation should proceed incrementally.
-
-Recommended sequence:
-
-``` text
-TASK 01
-Repository Scan / Baseline Validation
-
-TASK 02
-Sales Order Page Shell
-
-TASK 03
-New Order / Order Type Gate
-
-TASK 04
-Direct Order Form
-
-TASK 05
-Marketplace Order Form
-
-TASK 06
-SO Items / soItemId
-
-TASK 07
-Payment Records
-
-TASK 08
-SO Detail Right Drawer
-
-TASK 09
-WO Creation
-
-TASK 10
-WO Right Drawer / Production
-
-TASK 11
-Packing — SO Based Lookup
-
-TASK 12
-RTS / Handover / Complete Order
-
-TASK 13
-Full Validation
+```text
+PHASE 00  Project Initialization                         COMPLETE
+PHASE 01  Source / Legacy Deep Scan                      COMPLETE
+PHASE 02  Business Requirement SSOT                     APPROVED
+PHASE 03  Global System Architecture                    CURRENT
+PHASE 04  Database & Backend Architecture
+PHASE 05  API Contract
+PHASE 06  Frontend Architecture
+PHASE 07  UI/UX Design System
+PHASE 08  Master Data
+PHASE 09  Sales Order
+PHASE 10  Payment
+PHASE 11  Work Order & Production
+PHASE 12  Packing / RTS / Handover
+PHASE 13  Dashboard / Reporting
+PHASE 14  Full Integration
+PHASE 15  Security
+PHASE 16  Performance
+PHASE 17  Testing / UAT
+PHASE 18  Data Migration
+PHASE 19  Deployment
+PHASE 20  Final Audit / Release
 ```
 
-Do not start later tasks until the current task is validated.
+**Do not reset this roadmap.** The goal is a working, validated ERP V3.3 release, not repeated analysis.
 
 ------------------------------------------------------------------------
 
 # IMPORTANT
 
-The existing V2 code is a reference for behavior and data discovery.
-
-It is NOT permission to preserve conflicting V2 behavior.
+The existing V2 code is a reference for behavior and data discovery. It is NOT permission to preserve conflicting V2 behavior.
 
 When V2 conflicts with this V3 baseline:
 
