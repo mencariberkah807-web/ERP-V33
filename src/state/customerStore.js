@@ -1,3 +1,4 @@
+import { assertCustomerCollection } from "../domain/customer/customer.js";
 import { customerRepository } from "../repositories/customers/customerRepository.js";
 
 export const customerStore = {
@@ -12,6 +13,7 @@ export const customerStore = {
   },
 
   replaceCustomers(customers) {
+    assertCustomerCollection(customers);
     return customerRepository.replaceAll(customers);
   },
 
