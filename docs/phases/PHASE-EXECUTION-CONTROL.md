@@ -11,7 +11,8 @@ Its purpose is to prevent the project from restarting completed analysis, repeat
 - PHASE 00: COMPLETE
 - PHASE 01: COMPLETE — source/legacy scan is historical baseline only
 - PHASE 02: COMPLETE — Business Requirement SSOT APPROVED
-- CURRENT EXECUTION PHASE: PHASE 03
+- PHASE 03: COMPLETE — Global System Architecture
+- CURRENT EXECUTION PHASE: PHASE 04
 - TARGET: complete ERP V3.3 through PHASE 20 and final release
 
 ## NON-LOOP RULE
@@ -76,8 +77,8 @@ The 11 listed Open Decisions remain open and must not be silently invented. They
 
 ### Architecture / Contract
 
-03 Global System Architecture
-04 Database & Backend Architecture
+03 Global System Architecture — COMPLETE
+04 Database & Backend Architecture — CURRENT
 05 API Contract
 06 Frontend Architecture
 07 UI/UX Design System
@@ -140,11 +141,21 @@ If implementation reaches a genuine business ambiguity:
 
 Do not reset the project.
 
-## PHASE 03 START CONDITION
+## PHASE 03 COMPLETION
 
-PHASE 03 is authorized to begin immediately because PHASE 02 is approved.
+PHASE 03 produced and validated the Global System Architecture contract at:
 
-PHASE 03 must produce the architecture required by its phase document, validate it against the approved V3.3 business baseline and AGENTS.md, and then advance to PHASE 04 without requiring a new generic approval step.
+`docs/phases/PHASE-03-ARCHITECTURE-CONTRACT.md`
+
+The architecture establishes the Presentation → Application → Domain → Repository → Infrastructure boundaries, repository ports, application use cases, state ownership, validation/error boundaries, integration boundary, migration strategy, and architecture decisions required by the Phase 03 specification.
+
+PHASE 03 is complete. The project advances immediately to PHASE 04.
+
+## PHASE 04 START CONDITION
+
+PHASE 04 is authorized to begin immediately because PHASE 03 is complete.
+
+PHASE 04 must produce the Database & Backend Architecture required by its phase document, validate it against the approved V3.3 business baseline, PHASE 03 architecture contract, and AGENTS.md, then advance to PHASE 05 without requiring a new generic approval step.
 
 ## FINAL OBJECTIVE
 
