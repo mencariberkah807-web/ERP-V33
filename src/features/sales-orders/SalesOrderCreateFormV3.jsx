@@ -52,7 +52,7 @@ export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, i
   const [customers] = useState(() => customerStore.getActiveCustomers());
   const [products, setProducts] = useState(() => productStore.getActiveProducts());
   const [categories] = useState(() => categoryStore.getCategories().filter((category) => category.status === "Active"));
-  const [orderType] = useState(initialOrder?.orderType ?? "DIRECT");
+  const [orderType, setOrderType] = useState(initialOrder?.orderType ?? "DIRECT");
   const [orderDate, setOrderDate] = useState(initialOrder?.orderDate ?? TODAY);
   const [deadline, setDeadline] = useState(initialOrder?.deadline ?? "");
   const [priority, setPriority] = useState(initialOrder?.priority ?? "Regular");
@@ -183,8 +183,8 @@ export default function SalesOrderCreateFormV3({ onCancel, onCreated, onSaved, i
       <section className="ui-card">
         <div className="sales-order-card-header">Order Type</div>
         <div className="sales-order-card-body sales-order-radio-row">
-          <label className="sales-order-radio"><input type="radio" name="orderType" value="DIRECT" checked={orderType === "DIRECT"} readOnly />Direct Order</label>
-          <label className="sales-order-radio"><input type="radio" name="orderType" value="MARKETPLACE" checked={orderType === "MARKETPLACE"} readOnly />Marketplace</label>
+          <label className="sales-order-radio"><input type="radio" name="orderType" value="DIRECT" checked={orderType === "DIRECT"} disabled={isEditing} onChange={() => setOrderType("DIRECT")} />Direct Order</label>
+          <label className="sales-order-radio"><input type="radio" name="orderType" value="MARKETPLACE" checked={orderType === "MARKETPLACE"} disabled={isEditing} onChange={() => setOrderType("MARKETPLACE")} />Marketplace</label>
           {isEditing && <span className="sales-order-edit-note">Order Type cannot be changed during edit.</span>}
         </div>
       </section>
