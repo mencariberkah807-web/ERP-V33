@@ -37,7 +37,7 @@ class SalesOrderItemInput(BaseModel):
     soItemId:str|None=None
     productId:str
     quantity:Decimal=Field(gt=0)
-    unitPrice:Decimal=Field(default=Decimal("0"),ge=0)
+    unitPrice:Decimal|None=Field(default=None,ge=0)
 class SalesOrderCreateInput(BaseModel):
     orderType:str
     customerId:str
@@ -121,11 +121,17 @@ def create_sales_order(payload:SalesOrderCreateInput,idempotency_key:str|None=He
             if existing.endpoint!=endpoint or (stored_hash and stored_hash!=request_hash): raise HTTPException(status_code=409,detail={"code":"IDEMPOTENCY_CONFLICT","message":"Idempotency-Key was already used for a different request","details":{}})
             stored.pop("_requestHash",None); return stored
         try:
-            customer_id=resolve_customer_id(db,payload.customerId); product_rows=[(item,resolve_product_id(db,item.productId)) for item in payload.items]; total_amount=sum((item.quantity*item.unitPrice for item in payload.items),Decimal("0"))
+            customer_id=resolve_customer_id(db,payload.customerId); product_rows=[(item,resolve_product_id(db,item.productId)) for item in payload.items]
+            resolved_items=[]
+            for item,product_id in product_rows:
+                product=db.get(Product,product_id)
+                unit_price=item.unitPrice if item.unitPrice is not None else Decimal(str(product.selling_price or 0))
+                resolved_items.append((item,product_id,unit_price))
+            total_amount=sum((item.quantity*unit_price for item,_,unit_price in resolved_items),Decimal("0"))
             if normalized_type=="MARKETPLACE" and total_amount<=0: raise HTTPException(status_code=422,detail="Marketplace order must have a positive total amount")
             order=SalesOrder(order_number=_next_order_number(db),customer_id=customer_id,order_type=normalized_type,status="READY_PRODUCTION" if normalized_type=="MARKETPLACE" else "NEW_ORDER",order_date=payload.orderDate,deadline=payload.deadline,priority=payload.priority,marketplace=payload.marketplace,marketplace_customer=payload.marketplaceCustomer,tracking_number=payload.trackingNumber); db.add(order); db.flush(); created_items=[]
-            for item,product_id in product_rows:
-                product=db.get(Product,product_id); so_item=SalesOrderItem(sales_order_id=order.sales_order_id,product_id=product_id,item_code=product.product_code,product_name=product.name,quantity=item.quantity,unit_price=item.unitPrice,status="ACTIVE"); db.add(so_item); db.flush(); created_items.append(so_item)
+            for item,product_id,unit_price in resolved_items:
+                product=db.get(Product,product_id); so_item=SalesOrderItem(sales_order_id=order.sales_order_id,product_id=product_id,item_code=product.product_code,product_name=product.name,quantity=item.quantity,unit_price=unit_price,status="ACTIVE"); db.add(so_item); db.flush(); created_items.append(so_item)
             if normalized_type=="MARKETPLACE":
                 db.add(Payment(sales_order_id=order.sales_order_id,amount=total_amount,payment_method="MARKETPLACE",payment_reference=idempotency_key,paid_at=datetime.utcnow(),data={"status":"PAID","source":"MARKETPLACE","idempotencyKey":idempotency_key}))
                 for so_item in created_items: db.add(WorkOrder(sales_order_id=order.sales_order_id,so_item_id=so_item.so_item_id,work_order_number=_next_work_order_number(db),status="READY_PRODUCTION",data={"source":"MARKETPLACE","salesOrderNumber":order.order_number,"soItemId":str(so_item.so_item_id)}))
