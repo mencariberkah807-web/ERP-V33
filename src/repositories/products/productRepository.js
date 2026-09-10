@@ -18,19 +18,18 @@ function readProducts() {
   }
 }
 
-async function syncProduct(product) {
+async function syncProduct(product, remoteProducts = []) {
+  const productId = product.productId;
+  const exists = remoteProducts.some((remote) => String(remote.productId) === String(productId));
+
   try {
-    await apiProductRepository.create(product);
+    if (exists) {
+      await apiProductRepository.update(productId, product);
+    } else {
+      await apiProductRepository.create(product);
+    }
   } catch (error) {
-    if (!String(error?.message || "").toLowerCase().includes("already exists")) {
-      console.error("Product API sync failed:", error);
-      return;
-    }
-    try {
-      await apiProductRepository.update(product.productId, product);
-    } catch (updateError) {
-      console.error("Product API update sync failed:", updateError);
-    }
+    console.error("Product API sync failed:", error);
   }
 }
 
@@ -43,7 +42,14 @@ function writeProducts(products) {
 
 async function syncAll() {
   const products = readProducts();
-  await Promise.all(products.map((product) => syncProduct(product)));
+  if (!products.length) return;
+
+  try {
+    const remoteProducts = await apiProductRepository.getAll();
+    await Promise.all(products.map((product) => syncProduct(product, remoteProducts)));
+  } catch (error) {
+    console.error("Product API sync failed:", error);
+  }
 }
 
 export const productRepository = {
