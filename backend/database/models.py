@@ -48,9 +48,7 @@ class SalesOrder(Base):
     __table_args__ = (
         CheckConstraint("order_type IN ('DIRECT_ORDER', 'MARKETPLACE')", name="ck_sales_orders_order_type"),
         CheckConstraint("status IN ('NEW_ORDER', 'READY_PRODUCTION', 'IN_PRODUCTION', 'PACKING', 'RTS', 'COMPLETED', 'INACTIVE')", name="ck_sales_orders_status"),
-        Index("ix_sales_orders_customer", "customer_id"),
-        Index("ix_sales_orders_status", "status"),
-        Index("ix_sales_orders_order_type", "order_type"),
+        Index("ix_sales_orders_customer", "customer_id"), Index("ix_sales_orders_status", "status"), Index("ix_sales_orders_order_type", "order_type"),
     )
 
 
@@ -69,10 +67,8 @@ class SalesOrderItem(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     __table_args__ = (
         UniqueConstraint("sales_order_id", "so_item_id", name="uq_sales_order_item_identity"),
-        CheckConstraint("quantity > 0", name="ck_sales_order_items_quantity"),
-        CheckConstraint("unit_price >= 0", name="ck_sales_order_items_unit_price"),
-        CheckConstraint("status IN ('ACTIVE', 'INACTIVE')", name="ck_sales_order_items_status"),
-        Index("ix_sales_order_items_order", "sales_order_id"),
+        CheckConstraint("quantity > 0", name="ck_sales_order_items_quantity"), CheckConstraint("unit_price >= 0", name="ck_sales_order_items_unit_price"),
+        CheckConstraint("status IN ('ACTIVE', 'INACTIVE')", name="ck_sales_order_items_status"), Index("ix_sales_order_items_order", "sales_order_id"),
     )
 
 
@@ -102,9 +98,8 @@ class WorkOrder(Base):
     __table_args__ = (
         ForeignKeyConstraint(["sales_order_id", "so_item_id"], ["sales_order_items.sales_order_id", "sales_order_items.so_item_id"], name="fk_work_order_sales_order_item"),
         CheckConstraint("status IN ('READY_PRODUCTION', 'IN_PRODUCTION', 'COMPLETED_PRODUCTION', 'INACTIVE')", name="ck_work_orders_status"),
-        Index("ix_work_orders_order", "sales_order_id", "so_item_id"),
-        Index("ix_work_orders_status", "status"),
-        Index("ux_work_orders_active_so_item", "sales_order_id", "so_item_id", unique=True, sqlite_where=(status != "INACTIVE")),
+        Index("ix_work_orders_order", "sales_order_id", "so_item_id"), Index("ix_work_orders_status", "status"),
+        Index("ux_work_orders_active_so_item", "sales_order_id", "so_item_id", unique=True, sqlite_where=(status != "INACTIVE"), postgresql_where=(status != "INACTIVE")),
     )
 
 
@@ -116,10 +111,7 @@ class ProductionRecord(Base):
     data: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-    __table_args__ = (
-        CheckConstraint("status IN ('READY_PRODUCTION', 'IN_PRODUCTION', 'COMPLETED_PRODUCTION', 'INACTIVE')", name="ck_production_records_status"),
-        Index("ix_production_work_order_status", "work_order_id", "status"),
-    )
+    __table_args__ = (CheckConstraint("status IN ('READY_PRODUCTION', 'IN_PRODUCTION', 'COMPLETED_PRODUCTION', 'INACTIVE')", name="ck_production_records_status"), Index("ix_production_work_order_status", "work_order_id", "status"))
 
 
 class Fulfillment(Base):
