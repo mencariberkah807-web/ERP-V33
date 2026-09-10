@@ -18,19 +18,18 @@ function readCustomers() {
   }
 }
 
-async function syncCustomer(customer) {
+async function syncCustomer(customer, remoteCustomers = []) {
+  const customerId = customer.customerId;
+  const exists = remoteCustomers.some((remote) => String(remote.customerId) === String(customerId));
+
   try {
-    await apiCustomerRepository.create(customer);
+    if (exists) {
+      await apiCustomerRepository.update(customerId, customer);
+    } else {
+      await apiCustomerRepository.create(customer);
+    }
   } catch (error) {
-    if (!String(error?.message || "").toLowerCase().includes("already exists")) {
-      console.error("Customer API sync failed:", error);
-      return;
-    }
-    try {
-      await apiCustomerRepository.update(customer.customerId, customer);
-    } catch (updateError) {
-      console.error("Customer API update sync failed:", updateError);
-    }
+    console.error("Customer API sync failed:", error);
   }
 }
 
@@ -43,7 +42,14 @@ function writeCustomers(customers) {
 
 async function syncAll() {
   const customers = readCustomers();
-  await Promise.all(customers.map((customer) => syncCustomer(customer)));
+  if (!customers.length) return;
+
+  try {
+    const remoteCustomers = await apiCustomerRepository.getAll();
+    await Promise.all(customers.map((customer) => syncCustomer(customer, remoteCustomers)));
+  } catch (error) {
+    console.error("Customer API sync failed:", error);
+  }
 }
 
 export const customerRepository = {
