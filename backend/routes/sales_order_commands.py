@@ -24,7 +24,7 @@ class SalesOrderUpdateInput(BaseModel):
 class SalesOrderItemCreateInput(BaseModel):
     productId: str
     quantity: Decimal = Field(gt=0)
-    unitPrice: Decimal = Field(default=Decimal("0"), ge=0)
+    unitPrice: Decimal | None = Field(default=None, ge=0)
 
 class SalesOrderItemUpdateInput(BaseModel):
     quantity: Decimal | None = Field(default=None, gt=0)
@@ -69,6 +69,12 @@ def _item_data(item):
 
 def _request(key, endpoint, payload, db):
     return _idempotency(db, key or "", endpoint, payload)
+
+def _resolve_unit_price(product, requested_price):
+    if requested_price is not None: return requested_price
+    product_data = dict(product.data or {})
+    selling_price = product_data.get("sellingPrice", product_data.get("selling_price", 0))
+    return Decimal(str(selling_price or 0))
 
 @router.get("")
 def list_sales_orders(
@@ -186,7 +192,8 @@ def add_sales_order_item(so_number,payload:SalesOrderItemCreateInput,idempotency
         record=_order(db,so_number); _editable_order(record); normalized=payload.productId.strip(); product=db.scalar(select(Product).where(Product.product_code==normalized))
         if not product and normalized.isdigit(): product=db.get(Product,int(normalized))
         if not product: raise HTTPException(status_code=404,detail=f"Product not found: {normalized}")
-        item=SalesOrderItem(sales_order_id=record.sales_order_id,product_id=product.product_id,item_code=product.product_code,product_name=product.name,quantity=payload.quantity,unit_price=payload.unitPrice,status="ACTIVE"); db.add(item); db.flush()
+        unit_price=_resolve_unit_price(product,payload.unitPrice)
+        item=SalesOrderItem(sales_order_id=record.sales_order_id,product_id=product.product_id,item_code=product.product_code,product_name=product.name,quantity=payload.quantity,unit_price=unit_price,status="ACTIVE"); db.add(item); db.flush()
         response=_success(_item_data(item)); _store(db,idempotency_key,endpoint,request_data,response); db.commit(); return response
 
 @router.patch("/{so_number}/items/{so_item_id}")
