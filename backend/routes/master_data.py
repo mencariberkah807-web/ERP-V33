@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from database.connection import engine
@@ -72,7 +73,11 @@ def create_customer(payload: CustomerInput):
         values = payload.model_dump()
         record = Customer(customer_code=payload.customerId, name=payload.customerName, status=payload.status, data=values)
         db.add(record)
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            raise HTTPException(status_code=409, detail=f"Customer already exists: {payload.customerId}")
         db.refresh(record)
         return success(customer_data(record))
 
@@ -111,7 +116,11 @@ def create_product(payload: ProductInput):
         values = payload.model_dump()
         record = Product(product_code=payload.productId, name=payload.productName, status=payload.status, data=values)
         db.add(record)
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            raise HTTPException(status_code=409, detail=f"Product already exists: {payload.productId}")
         db.refresh(record)
         return success(product_data(record))
 
