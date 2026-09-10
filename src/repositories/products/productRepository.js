@@ -22,7 +22,7 @@ async function syncProduct(product) {
   try {
     await apiProductRepository.create(product);
   } catch (error) {
-    if (!String(error?.message || "").includes("already exists")) {
+    if (!String(error?.message || "").toLowerCase().includes("already exists")) {
       console.error("Product API sync failed:", error);
       return;
     }
@@ -37,13 +37,19 @@ async function syncProduct(product) {
 function writeProducts(products) {
   if (!Array.isArray(products)) throw new TypeError("Product repository expects an array.");
   if (storageIsAvailable()) window.localStorage.setItem(PRODUCT_STORAGE_KEY, JSON.stringify(products));
-  for (const product of products) void syncProduct(product);
+  void syncAll();
   return products;
+}
+
+async function syncAll() {
+  const products = readProducts();
+  await Promise.all(products.map((product) => syncProduct(product)));
 }
 
 export const productRepository = {
   getAll() { return readProducts(); },
   replaceAll(products) { return writeProducts(products); },
+  syncAll,
   clear() {
     if (storageIsAvailable()) window.localStorage.removeItem(PRODUCT_STORAGE_KEY);
   },
