@@ -22,7 +22,7 @@ async function syncCustomer(customer) {
   try {
     await apiCustomerRepository.create(customer);
   } catch (error) {
-    if (!String(error?.message || "").includes("already exists")) {
+    if (!String(error?.message || "").toLowerCase().includes("already exists")) {
       console.error("Customer API sync failed:", error);
       return;
     }
@@ -37,13 +37,19 @@ async function syncCustomer(customer) {
 function writeCustomers(customers) {
   if (!Array.isArray(customers)) throw new TypeError("Customer repository expects an array.");
   if (storageIsAvailable()) window.localStorage.setItem(CUSTOMER_STORAGE_KEY, JSON.stringify(customers));
-  for (const customer of customers) void syncCustomer(customer);
+  void syncAll();
   return customers;
+}
+
+async function syncAll() {
+  const customers = readCustomers();
+  await Promise.all(customers.map((customer) => syncCustomer(customer)));
 }
 
 export const customerRepository = {
   getAll() { return readCustomers(); },
   replaceAll(customers) { return writeCustomers(customers); },
+  syncAll,
   clear() {
     if (storageIsAvailable()) window.localStorage.removeItem(CUSTOMER_STORAGE_KEY);
   },
