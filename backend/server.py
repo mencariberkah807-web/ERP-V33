@@ -1,6 +1,6 @@
 import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
@@ -19,15 +19,27 @@ app.add_middleware(
 )
 
 
+def _external_customer_id(record: Customer) -> str:
+    """Expose the existing business code without changing the DB primary key."""
+    return record.customer_code or str(record.customer_id)
+
+
+def _external_product_id(record: Product) -> str:
+    """Expose the existing business code without changing the DB primary key."""
+    return record.product_code or str(record.product_id)
+
+
 def _model_data(record):
     data = dict(record.data or {})
     if record.__class__ is Customer:
-        data.setdefault("customerId", record.customer_id)
+        external_id = _external_customer_id(record)
+        data.setdefault("customerId", external_id)
         data.setdefault("customerCode", record.customer_code)
         data.setdefault("displayName", record.name)
         data.setdefault("status", record.status)
     elif record.__class__ is Product:
-        data.setdefault("productId", record.product_id)
+        external_id = _external_product_id(record)
+        data.setdefault("productId", external_id)
         data.setdefault("productCode", record.product_code)
         data.setdefault("name", record.name)
         data.setdefault("status", record.status)
@@ -41,6 +53,42 @@ def _model_data(record):
 
 def _success(data, meta=None):
     return {"data": data, "meta": meta or {}}
+
+
+def resolve_customer_id(db: Session, external_id: str) -> int:
+    """Resolve an API/customer business identifier to the internal DB PK."""
+    normalized = str(external_id).strip()
+    if not normalized:
+        raise HTTPException(status_code=422, detail="customerId is required")
+
+    record = db.scalar(select(Customer).where(Customer.customer_code == normalized))
+    if record:
+        return record.customer_id
+
+    if normalized.isdigit():
+        record = db.get(Customer, int(normalized))
+        if record:
+            return record.customer_id
+
+    raise HTTPException(status_code=404, detail=f"Customer not found: {normalized}")
+
+
+def resolve_product_id(db: Session, external_id: str) -> int:
+    """Resolve an API/product business identifier to the internal DB PK."""
+    normalized = str(external_id).strip()
+    if not normalized:
+        raise HTTPException(status_code=422, detail="productId is required")
+
+    record = db.scalar(select(Product).where(Product.product_code == normalized))
+    if record:
+        return record.product_id
+
+    if normalized.isdigit():
+        record = db.get(Product, int(normalized))
+        if record:
+            return record.product_id
+
+    raise HTTPException(status_code=404, detail=f"Product not found: {normalized}")
 
 
 @app.get("/api/health")
