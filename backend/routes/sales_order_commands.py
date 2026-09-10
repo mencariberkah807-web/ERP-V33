@@ -133,7 +133,7 @@ def cancel_sales_order(so_number, idempotency_key: str | None = Header(default=N
 
 @router.get("/{so_number}/items")
 def get_sales_order_items(so_number, page: int = Query(default=1, ge=1), pageSize: int = Query(default=25, ge=1, le=100), sort: str = Query(default="so_item_id"), status: str | None = Query(default=None), active: bool | None = Query(default=None)):
-    allowed_sorts = {"so_item_id": SalesOrderItem.so_item_id, "productId": SalesOrderItem.item_code, "quantity": SalesOrderItem.quantity, "unitPrice": SalesOrderItem.unit_price, "status": SalesOrderItem.status}
+    allowed_sorts = {"so_item_id": SalesOrderItem.so_item_id, "soItemId": SalesOrderItem.so_item_id, "productId": SalesOrderItem.item_code, "quantity": SalesOrderItem.quantity, "unitPrice": SalesOrderItem.unit_price, "status": SalesOrderItem.status}
     sort_key = sort.lstrip("-")
     if sort_key not in allowed_sorts: raise HTTPException(status_code=422, detail=f"Unsupported sort field: {sort_key}")
     descending = sort.startswith("-")
