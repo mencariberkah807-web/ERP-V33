@@ -125,7 +125,9 @@ def create_sales_order(payload:SalesOrderCreateInput,idempotency_key:str|None=He
             resolved_items=[]
             for item,product_id in product_rows:
                 product=db.get(Product,product_id)
-                unit_price=item.unitPrice if item.unitPrice is not None else Decimal(str(product.selling_price or 0))
+                product_data=dict(product.data or {})
+                selling_price=product_data.get("sellingPrice",product_data.get("selling_price",0))
+                unit_price=item.unitPrice if item.unitPrice is not None else Decimal(str(selling_price or 0))
                 resolved_items.append((item,product_id,unit_price))
             total_amount=sum((item.quantity*unit_price for item,_,unit_price in resolved_items),Decimal("0"))
             if normalized_type=="MARKETPLACE" and total_amount<=0: raise HTTPException(status_code=422,detail="Marketplace order must have a positive total amount")
