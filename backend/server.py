@@ -14,10 +14,12 @@ from sqlalchemy.orm import Session
 from database.connection import engine
 from database.models import Customer, IdempotencyRecord, Payment, Product, SalesOrder, SalesOrderItem, WorkOrder
 from routes.master_data import router as master_data_router
+from routes.sales_order_commands import router as sales_order_commands_router
 
 app = FastAPI(title="ARTKRILIK ERP V3.3 API", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 app.include_router(master_data_router)
+app.include_router(sales_order_commands_router)
 
 
 ERROR_CODES = {
