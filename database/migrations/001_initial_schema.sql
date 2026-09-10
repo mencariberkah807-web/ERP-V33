@@ -48,7 +48,8 @@ CREATE TABLE IF NOT EXISTS sales_order_items (
   status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE')),
   data JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_sales_order_item_identity UNIQUE (sales_order_id, so_item_id)
 );
 
 CREATE TABLE IF NOT EXISTS payments (
@@ -64,14 +65,16 @@ CREATE TABLE IF NOT EXISTS payments (
 
 CREATE TABLE IF NOT EXISTS work_orders (
   work_order_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  sales_order_id BIGINT NOT NULL REFERENCES sales_orders(sales_order_id),
-  so_item_id BIGINT NOT NULL REFERENCES sales_order_items(so_item_id),
+  sales_order_id BIGINT NOT NULL,
+  so_item_id BIGINT NOT NULL,
   work_order_number TEXT UNIQUE,
   status TEXT NOT NULL DEFAULT 'READY_PRODUCTION' CHECK (status IN ('READY_PRODUCTION', 'IN_PRODUCTION', 'COMPLETED_PRODUCTION', 'INACTIVE')),
   data JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CONSTRAINT work_order_item_belongs_to_order UNIQUE (sales_order_id, so_item_id, work_order_id)
+  CONSTRAINT fk_work_order_sales_order_item
+    FOREIGN KEY (sales_order_id, so_item_id)
+    REFERENCES sales_order_items(sales_order_id, so_item_id)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_work_orders_active_so_item
