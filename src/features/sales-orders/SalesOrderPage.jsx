@@ -6,6 +6,7 @@ import SalesOrderDetailDrawer from "./SalesOrderDetailDrawer.jsx";
 
 import "./salesOrder.css";
 import "./salesOrderList.css";
+import "./salesOrderReadable.css";
 
 function formatIDR(value) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(value || 0));
