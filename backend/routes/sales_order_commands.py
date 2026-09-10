@@ -60,7 +60,7 @@ def _resolve_unit_price(product, requested_price):
     selling_price = product_data.get("sellingPrice", product_data.get("selling_price", 0))
     return Decimal(str(selling_price or 0))
 
-def _payment_status_condition(db, normalized_payment):
+def _payment_status_condition(normalized_payment):
     payment_totals = select(Payment.sales_order_id, func.coalesce(func.sum(Payment.amount), 0).label("paid_amount")).group_by(Payment.sales_order_id).subquery()
     order_totals = select(SalesOrderItem.sales_order_id, func.coalesce(func.sum(SalesOrderItem.quantity * SalesOrderItem.unit_price), 0).label("order_total")).where(SalesOrderItem.status != "INACTIVE").group_by(SalesOrderItem.sales_order_id).subquery()
     paid_amount = func.coalesce(payment_totals.c.paid_amount, 0)
@@ -90,7 +90,7 @@ def list_sales_orders(page: int = Query(default=1, ge=1), pageSize: int = Query(
         if dateTo: conditions.append(SalesOrder.order_date <= dateTo)
         if active is True: conditions.append(SalesOrder.status != "INACTIVE")
         elif active is False: conditions.append(SalesOrder.status == "INACTIVE")
-        if paymentStatus: conditions.append(_payment_status_condition(db, paymentStatus.strip().upper().replace(" ", "_")))
+        if paymentStatus: conditions.append(_payment_status_condition(paymentStatus.strip().upper().replace(" ", "_")))
         base = select(SalesOrder).where(*conditions); count = db.scalar(select(func.count()).select_from(base.subquery())) or 0
         ordering = allowed_sorts[sort_key].desc() if descending else allowed_sorts[sort_key].asc()
         rows = db.scalars(base.order_by(ordering, SalesOrder.sales_order_id.asc()).offset((page - 1) * pageSize).limit(pageSize)).all(); result=[]
@@ -132,9 +132,20 @@ def cancel_sales_order(so_number, idempotency_key: str | None = Header(default=N
         response=_success({"soNumber":record.order_number,"status":record.status}); _store(db,idempotency_key,endpoint,request_data,response); db.commit(); return response
 
 @router.get("/{so_number}/items")
-def get_sales_order_items(so_number):
+def get_sales_order_items(so_number, page: int = Query(default=1, ge=1), pageSize: int = Query(default=25, ge=1, le=100), sort: str = Query(default="so_item_id"), status: str | None = Query(default=None), active: bool | None = Query(default=None)):
+    allowed_sorts = {"so_item_id": SalesOrderItem.so_item_id, "productId": SalesOrderItem.item_code, "quantity": SalesOrderItem.quantity, "unitPrice": SalesOrderItem.unit_price, "status": SalesOrderItem.status}
+    sort_key = sort.lstrip("-")
+    if sort_key not in allowed_sorts: raise HTTPException(status_code=422, detail=f"Unsupported sort field: {sort_key}")
+    descending = sort.startswith("-")
     with Session(engine) as db:
-        record=_order(db,so_number); items=db.scalars(select(SalesOrderItem).where(SalesOrderItem.sales_order_id==record.sales_order_id).order_by(SalesOrderItem.so_item_id)).all(); return _success([_item_data(item) for item in items])
+        record=_order(db,so_number); conditions=[SalesOrderItem.sales_order_id==record.sales_order_id]
+        if status: conditions.append(SalesOrderItem.status == status.strip().upper().replace(" ", "_"))
+        if active is True: conditions.append(SalesOrderItem.status != "INACTIVE")
+        elif active is False: conditions.append(SalesOrderItem.status == "INACTIVE")
+        base=select(SalesOrderItem).where(*conditions); count=db.scalar(select(func.count()).select_from(base.subquery())) or 0
+        ordering=allowed_sorts[sort_key].desc() if descending else allowed_sorts[sort_key].asc()
+        items=db.scalars(base.order_by(ordering, SalesOrderItem.so_item_id.asc()).offset((page-1)*pageSize).limit(pageSize)).all()
+        return _success([_item_data(item) for item in items], {"page":page,"pageSize":pageSize,"total":count,"totalPages":(count+pageSize-1)//pageSize})
 
 @router.post("/{so_number}/items", status_code=201)
 def add_sales_order_item(so_number,payload:SalesOrderItemCreateInput,idempotency_key:str|None=Header(default=None,alias="Idempotency-Key")):
