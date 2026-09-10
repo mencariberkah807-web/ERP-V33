@@ -139,3 +139,12 @@ class AuditRecord(Base):
     event_payload: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     __table_args__ = (Index("ix_audit_entity", "entity_type", "entity_id", "created_at"),)
+
+
+class IdempotencyRecord(Base):
+    __tablename__ = "idempotency_records"
+    idempotency_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    idempotency_key: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    endpoint: Mapped[str] = mapped_column(String(255), nullable=False)
+    response_data: Mapped[dict] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
