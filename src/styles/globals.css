@@ -1,211 +1,111 @@
+@import "./tokens.css";
+
 :root {
-
-  /* Brand */
-
-  --color-brand-navy: #12304A;
-
-  --color-primary: #2F80ED;
-
-  --color-danger: #DC2626;
-
-
-  /* Background */
-
-  --color-bg: #F5F7FB;
-
-  --color-surface: #FFFFFF;
-
-
-  /* Text */
-
-  --color-text: #1F2937;
-
-  --color-text-muted: #6B7280;
-
-
-  /* Border */
-
-  --color-border: #E5E7EB;
-
-
-  /* Radius */
-
-  --radius-sm: 8px;
-
-  --radius-md: 12px;
-
-  --radius-lg: 18px;
-
-
-  /* Spacing */
-
-  --space-1: 4px;
-
-  --space-2: 8px;
-
-  --space-3: 12px;
-
-  --space-4: 16px;
-
-  --space-5: 20px;
-
-  --space-6: 24px;
-
-  --space-8: 32px;
-
+  --color-brand-navy: var(--erp-brand);
+  --color-primary: var(--erp-primary);
+  --color-danger: var(--erp-danger);
+  --color-bg: var(--erp-bg);
+  --color-surface: var(--erp-surface);
+  --color-text: var(--erp-text);
+  --color-text-muted: var(--erp-text-muted);
+  --color-border: var(--erp-border);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --space-1: var(--space-1);
+  --space-2: var(--space-2);
+  --space-3: var(--space-3);
+  --space-4: var(--space-4);
+  --space-5: var(--space-5);
+  --space-6: var(--space-6);
+  --space-8: var(--space-8);
 }
-
-
 
 * {
-
   box-sizing: border-box;
-
 }
-
-
 
 html,
-
 body,
-
 #root {
-
   margin: 0;
-
   min-height: 100%;
-
 }
-
-
 
 body {
-
-  font-family:
-
-    Inter,
-
-    Arial,
-
-    sans-serif;
-
-  background:
-
-    var(--color-bg);
-
-  color:
-
-    var(--color-text);
-
+  font-family: var(--font-base);
+  background: var(--erp-bg);
+  color: var(--erp-text);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
-
-
 
 button,
-
 input,
-
 select,
-
 textarea {
-
-  font-family: inherit;
-
+  font: inherit;
 }
-
-
 
 button {
-
   cursor: pointer;
-
 }
-
-
 
 h1,
-
 h2,
-
 h3,
-
 h4,
-
 p {
-
   margin-top: 0;
-
 }
 
-
-
-/* Shared UI Foundation */
-
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.25;
+}
 
 .ui-card {
-
-  background:
-
-    var(--color-surface);
-
-  border:
-
-    1px solid var(--color-border);
-
-  border-radius:
-
-    var(--radius-md);
-
-  padding:
-
-    var(--space-6);
-
+  background: var(--erp-surface);
+  border: 1px solid var(--erp-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-6);
 }
-
-
 
 .ui-button-primary {
-
-  background:
-
-    var(--color-primary);
-
-  color:
-
-    white;
-
-  border:
-
-    none;
-
-  border-radius:
-
-    var(--radius-sm);
-
-  padding:
-
-    10px 18px;
-
+  min-height: 42px;
+  padding: 0 18px;
+  background: var(--erp-primary);
+  color: #fff;
+  border: 1px solid var(--erp-primary);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: var(--weight-semibold);
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
 
-
+.ui-button-primary:hover {
+  background: var(--erp-primary-hover);
+  border-color: var(--erp-primary-hover);
+}
 
 .ui-input {
-
   width: 100%;
+  height: 44px;
+  border: 1px solid var(--erp-border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0 13px;
+  background: var(--erp-surface);
+  color: var(--erp-text);
+  font-size: 16px;
+  outline: none;
+}
 
-  height: 42px;
-
-  border:
-
-    1px solid var(--color-border);
-
-  border-radius:
-
-    var(--radius-sm);
-
-  padding:
-
-    0 12px;
-
+.ui-input:focus {
+  border-color: var(--erp-primary);
+  box-shadow: 0 0 0 3px var(--erp-primary-soft);
 }
