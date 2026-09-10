@@ -2,8 +2,10 @@ import os
 from datetime import date, datetime
 from decimal import Decimal
 
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import select, text
 from sqlalchemy.exc import IntegrityError
@@ -17,11 +19,49 @@ app = FastAPI(title="ARTKRILIK ERP V3.3 API", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 app.include_router(master_data_router)
 
+
+ERROR_CODES = {
+    400: "BAD_REQUEST",
+    401: "UNAUTHORIZED",
+    403: "FORBIDDEN",
+    404: "NOT_FOUND",
+    409: "CONFLICT",
+    422: "VALIDATION_ERROR",
+    500: "INTERNAL_SERVER_ERROR",
+}
+
+
+def _error_response(status_code: int, message: str, details=None):
+    return JSONResponse(status_code=status_code, content={"error": {"code": ERROR_CODES.get(status_code, "API_ERROR"), "message": message, "details": details or {}}})
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    detail = exc.detail
+    if isinstance(detail, dict):
+        message = str(detail.get("message") or "Request failed")
+        details = detail.get("details") or {}
+        code = detail.get("code") or ERROR_CODES.get(exc.status_code, "API_ERROR")
+        return JSONResponse(status_code=exc.status_code, content={"error": {"code": code, "message": message, "details": details}})
+    return _error_response(exc.status_code, str(detail) if detail else "Request failed")
+
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
+    return _error_response(422, "Request validation failed", {"errors": exc.errors()})
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    return _error_response(500, "Internal server error")
+
+
 class SalesOrderItemInput(BaseModel):
     soItemId: str | None = None
     productId: str
     quantity: Decimal = Field(gt=0)
     unitPrice: Decimal = Field(default=Decimal("0"), ge=0)
+
 
 class SalesOrderCreateInput(BaseModel):
     orderType: str
@@ -107,15 +147,18 @@ def health():
     with Session(engine) as db: db.execute(text("SELECT 1"))
     return {"status": "ok", "database": "ok", "service": "artkrilik-erp-v33"}
 
+
 @app.get("/api/v1/customers")
 def customers():
     with Session(engine) as db: rows = db.scalars(select(Customer).order_by(Customer.customer_id)).all()
     return _success([_model_data(record) for record in rows])
 
+
 @app.get("/api/v1/products")
 def products():
     with Session(engine) as db: rows = db.scalars(select(Product).order_by(Product.product_id)).all()
     return _success([_model_data(record) for record in rows])
+
 
 @app.get("/api/v1/sales-orders")
 def sales_orders():
@@ -123,12 +166,14 @@ def sales_orders():
         rows = db.scalars(select(SalesOrder).order_by(SalesOrder.sales_order_id)).all()
         return _success([_sales_order_data(db, record) for record in rows])
 
+
 @app.get("/api/v1/sales-orders/{so_number}")
 def sales_order_detail(so_number: str):
     with Session(engine) as db:
         record = db.scalar(select(SalesOrder).where(SalesOrder.order_number == so_number))
         if not record: raise HTTPException(status_code=404, detail=f"Sales Order not found: {so_number}")
         return _success(_sales_order_data(db, record))
+
 
 @app.post("/api/v1/sales-orders", status_code=201)
 def create_sales_order(payload: SalesOrderCreateInput, idempotency_key: str | None = Header(default=None, alias="Idempotency-Key")):
@@ -171,6 +216,7 @@ def create_sales_order(payload: SalesOrderCreateInput, idempotency_key: str | No
             raise HTTPException(status_code=409, detail="Sales Order could not be created because a concurrent transaction conflicted")
         except Exception:
             db.rollback(); raise
+
 
 if __name__ == "__main__":
     import uvicorn
