@@ -9,16 +9,6 @@
   --color-text: var(--erp-text);
   --color-text-muted: var(--erp-text-muted);
   --color-border: var(--erp-border);
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --space-1: var(--space-1);
-  --space-2: var(--space-2);
-  --space-3: var(--space-3);
-  --space-4: var(--space-4);
-  --space-5: var(--space-5);
-  --space-6: var(--space-6);
-  --space-8: var(--space-8);
 }
 
 * {
