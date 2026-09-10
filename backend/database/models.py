@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, ForeignKey, Index, JSON, Numeric, String, Text, UniqueConstraint, func
+from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, ForeignKeyConstraint, Index, JSON, Numeric, String, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .connection import Base
@@ -86,26 +86,25 @@ class Payment(Base):
     paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     data: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    __table_args__ = (
-        CheckConstraint("amount > 0", name="ck_payments_amount"),
-        Index("ix_payments_order", "sales_order_id"),
-    )
+    __table_args__ = (CheckConstraint("amount > 0", name="ck_payments_amount"), Index("ix_payments_order", "sales_order_id"))
 
 
 class WorkOrder(Base):
     __tablename__ = "work_orders"
     work_order_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    sales_order_id: Mapped[int] = mapped_column(ForeignKey("sales_orders.sales_order_id"), nullable=False)
-    so_item_id: Mapped[int] = mapped_column(ForeignKey("sales_order_items.so_item_id"), nullable=False)
+    sales_order_id: Mapped[int] = mapped_column(nullable=False)
+    so_item_id: Mapped[int] = mapped_column(nullable=False)
     work_order_number: Mapped[str | None] = mapped_column(String(100), unique=True, nullable=True)
     status: Mapped[str] = mapped_column(String(40), default="READY_PRODUCTION", nullable=False)
     data: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     __table_args__ = (
+        ForeignKeyConstraint(["sales_order_id", "so_item_id"], ["sales_order_items.sales_order_id", "sales_order_items.so_item_id"], name="fk_work_order_sales_order_item"),
         CheckConstraint("status IN ('READY_PRODUCTION', 'IN_PRODUCTION', 'COMPLETED_PRODUCTION', 'INACTIVE')", name="ck_work_orders_status"),
         Index("ix_work_orders_order", "sales_order_id", "so_item_id"),
         Index("ix_work_orders_status", "status"),
+        Index("ux_work_orders_active_so_item", "sales_order_id", "so_item_id", unique=True, sqlite_where=(status != "INACTIVE")),
     )
 
 
