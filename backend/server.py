@@ -1,15 +1,16 @@
 import os
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy import select, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from database.connection import engine
-from database.models import Customer, Product, SalesOrder, SalesOrderItem
+from database.models import Customer, IdempotencyRecord, Payment, Product, SalesOrder, SalesOrderItem, WorkOrder
 from routes.master_data import router as master_data_router
 
 app = FastAPI(title="ARTKRILIK ERP V3.3 API", version="0.1.0")
@@ -33,11 +34,14 @@ class SalesOrderCreateInput(BaseModel):
     marketplaceCustomer: str | None = None
     trackingNumber: str | None = None
 
+
 def _external_customer_id(record: Customer) -> str:
     return record.customer_code or str(record.customer_id)
 
+
 def _external_product_id(record: Product) -> str:
     return record.product_code or str(record.product_id)
+
 
 def _model_data(record):
     data = dict(record.data or {})
@@ -49,6 +53,7 @@ def _model_data(record):
         data.setdefault("salesOrderId", record.sales_order_id); data.setdefault("soNumber", record.order_number); data.setdefault("orderType", record.order_type); data.setdefault("status", record.status)
     return data
 
+
 def _sales_order_data(db: Session, record: SalesOrder):
     data = _model_data(record); customer = db.get(Customer, record.customer_id)
     data.setdefault("customerId", _external_customer_id(customer) if customer else str(record.customer_id)); data.setdefault("orderDate", record.order_date.isoformat() if record.order_date else None); data.setdefault("deadline", record.deadline.isoformat() if record.deadline else None); data.setdefault("priority", record.priority); data.setdefault("marketplace", record.marketplace); data.setdefault("marketplaceCustomer", record.marketplace_customer); data.setdefault("trackingNumber", record.tracking_number)
@@ -56,7 +61,9 @@ def _sales_order_data(db: Session, record: SalesOrder):
     data["items"] = [{**dict(item.data or {}), "soItemId": str(item.so_item_id), "productId": _external_product_id(db.get(Product, item.product_id)) if item.product_id else item.item_code, "quantity": float(item.quantity), "unitPrice": float(item.unit_price), "status": item.status} for item in items]
     return data
 
+
 def _success(data, meta=None): return {"data": data, "meta": meta or {}}
+
 
 def resolve_customer_id(db: Session, external_id: str) -> int:
     normalized = str(external_id).strip()
@@ -68,6 +75,7 @@ def resolve_customer_id(db: Session, external_id: str) -> int:
         if record: return record.customer_id
     raise HTTPException(status_code=404, detail=f"Customer not found: {normalized}")
 
+
 def resolve_product_id(db: Session, external_id: str) -> int:
     normalized = str(external_id).strip()
     if not normalized: raise HTTPException(status_code=422, detail="productId is required")
@@ -78,11 +86,20 @@ def resolve_product_id(db: Session, external_id: str) -> int:
         if record: return record.product_id
     raise HTTPException(status_code=404, detail=f"Product not found: {normalized}")
 
+
 def _next_order_number(db: Session) -> str:
     maximum = 0
     for value in db.scalars(select(SalesOrder.order_number)).all():
         if value and value.startswith("SO") and value[2:].isdigit(): maximum = max(maximum, int(value[2:]))
     return f"SO{maximum + 1:06d}"
+
+
+def _next_work_order_number(db: Session) -> str:
+    maximum = 0
+    for value in db.scalars(select(WorkOrder.work_order_number)).all():
+        if value and value.startswith("WO") and value[2:].isdigit(): maximum = max(maximum, int(value[2:]))
+    return f"WO{maximum + 1:06d}"
+
 
 @app.get("/api/health")
 @app.get("/api/v1/health")
@@ -117,18 +134,41 @@ def sales_order_detail(so_number: str):
 def create_sales_order(payload: SalesOrderCreateInput, idempotency_key: str | None = Header(default=None, alias="Idempotency-Key")):
     normalized_type = payload.orderType.strip().upper().replace(" ", "_")
     if normalized_type not in {"DIRECT_ORDER", "MARKETPLACE"}: raise HTTPException(status_code=422, detail="orderType must be Direct Order or Marketplace")
-    if not idempotency_key: raise HTTPException(status_code=422, detail="Idempotency-Key is required")
+    if not idempotency_key or not idempotency_key.strip(): raise HTTPException(status_code=422, detail="Idempotency-Key is required")
+    endpoint = "POST /api/v1/sales-orders"
     with Session(engine) as db:
+        existing = db.scalar(select(IdempotencyRecord).where(IdempotencyRecord.idempotency_key == idempotency_key, IdempotencyRecord.endpoint == endpoint))
+        if existing:
+            return existing.response_data
         try:
             customer_id = resolve_customer_id(db, payload.customerId)
             product_rows = [(item, resolve_product_id(db, item.productId)) for item in payload.items]
-            order = SalesOrder(order_number=_next_order_number(db), customer_id=customer_id, order_type=normalized_type, status="NEW_ORDER", order_date=payload.orderDate, deadline=payload.deadline, priority=payload.priority, marketplace=payload.marketplace, marketplace_customer=payload.marketplaceCustomer, tracking_number=payload.trackingNumber)
+            total_amount = sum((item.quantity * item.unitPrice for item in payload.items), Decimal("0"))
+            if normalized_type == "MARKETPLACE" and total_amount <= 0:
+                raise HTTPException(status_code=422, detail="Marketplace order must have a positive total amount")
+            order = SalesOrder(order_number=_next_order_number(db), customer_id=customer_id, order_type=normalized_type, status="READY_PRODUCTION" if normalized_type == "MARKETPLACE" else "NEW_ORDER", order_date=payload.orderDate, deadline=payload.deadline, priority=payload.priority, marketplace=payload.marketplace, marketplace_customer=payload.marketplaceCustomer, tracking_number=payload.trackingNumber)
             db.add(order); db.flush()
+            created_items = []
             for item, product_id in product_rows:
                 product = db.get(Product, product_id)
-                db.add(SalesOrderItem(sales_order_id=order.sales_order_id, product_id=product_id, item_code=product.product_code, product_name=product.name, quantity=item.quantity, unit_price=item.unitPrice, status="ACTIVE"))
-            db.commit(); db.refresh(order)
-            return _success(_sales_order_data(db, order))
+                so_item = SalesOrderItem(sales_order_id=order.sales_order_id, product_id=product_id, item_code=product.product_code, product_name=product.name, quantity=item.quantity, unit_price=item.unitPrice, status="ACTIVE")
+                db.add(so_item); db.flush(); created_items.append(so_item)
+            if normalized_type == "MARKETPLACE":
+                db.add(Payment(sales_order_id=order.sales_order_id, amount=total_amount, payment_method="MARKETPLACE", payment_reference=idempotency_key, paid_at=datetime.utcnow(), data={"status": "PAID", "source": "MARKETPLACE", "idempotencyKey": idempotency_key}))
+                for so_item in created_items:
+                    db.add(WorkOrder(sales_order_id=order.sales_order_id, so_item_id=so_item.so_item_id, work_order_number=_next_work_order_number(db), status="READY_PRODUCTION", data={"source": "MARKETPLACE", "salesOrderNumber": order.order_number, "soItemId": str(so_item.so_item_id)}))
+            response = _success(_sales_order_data(db, order))
+            db.add(IdempotencyRecord(idempotency_key=idempotency_key, endpoint=endpoint, response_data=response))
+            db.commit()
+            return response
+        except HTTPException:
+            db.rollback(); raise
+        except IntegrityError:
+            db.rollback()
+            existing = db.scalar(select(IdempotencyRecord).where(IdempotencyRecord.idempotency_key == idempotency_key, IdempotencyRecord.endpoint == endpoint))
+            if existing:
+                return existing.response_data
+            raise HTTPException(status_code=409, detail="Sales Order could not be created because a concurrent transaction conflicted")
         except Exception:
             db.rollback(); raise
 
