@@ -21,7 +21,7 @@ def upgrade():
         sa.Column("response_data", sa.JSON(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
     )
-    op.create_unique_index("uq_idempotency_records_key", "idempotency_records", ["idempotency_key"])
+    op.create_index("uq_idempotency_records_key", "idempotency_records", ["idempotency_key"], unique=True)
 
 
 def downgrade():
