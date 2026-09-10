@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: artkrilik_erp
+      POSTGRES_USER: artkrilik
+      POSTGRES_PASSWORD: artkrilik
+    ports:
+      - "5432:5432"
+    volumes:
+      - artkrilik_postgres_data:/var/lib/postgresql/data
+
+  backend:
+    image: node:22-alpine
+    working_dir: /app
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://artkrilik:artkrilik@postgres:5432/artkrilik_erp
+      PORT: 3000
+      HOST: 0.0.0.0
+    volumes:
+      - ./backend:/app
+      - ./database:/database
+    command: sh -c "npm install && npm run migrate && npm start"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+
+volumes:
+  artkrilik_postgres_data:
