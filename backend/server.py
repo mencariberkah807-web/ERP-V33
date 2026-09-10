@@ -39,29 +39,37 @@ def _model_data(record):
     return data
 
 
+def _success(data, meta=None):
+    return {"data": data, "meta": meta or {}}
+
+
 @app.get("/api/health")
+@app.get("/api/v1/health")
 def health():
     with Session(engine) as db:
         db.execute(text("SELECT 1"))
     return {"status": "ok", "database": "ok", "service": "artkrilik-erp-v33"}
 
 
-@app.get("/api/customers")
+@app.get("/api/v1/customers")
 def customers():
     with Session(engine) as db:
-        return [_model_data(record) for record in db.scalars(select(Customer).order_by(Customer.customer_id)).all()]
+        rows = db.scalars(select(Customer).order_by(Customer.customer_id)).all()
+    return _success([_model_data(record) for record in rows])
 
 
-@app.get("/api/products")
+@app.get("/api/v1/products")
 def products():
     with Session(engine) as db:
-        return [_model_data(record) for record in db.scalars(select(Product).order_by(Product.product_id)).all()]
+        rows = db.scalars(select(Product).order_by(Product.product_id)).all()
+    return _success([_model_data(record) for record in rows])
 
 
-@app.get("/api/sales-orders")
+@app.get("/api/v1/sales-orders")
 def sales_orders():
     with Session(engine) as db:
-        return [_model_data(record) for record in db.scalars(select(SalesOrder).order_by(SalesOrder.sales_order_id)).all()]
+        rows = db.scalars(select(SalesOrder).order_by(SalesOrder.sales_order_id)).all()
+    return _success([_model_data(record) for record in rows])
 
 
 if __name__ == "__main__":
