@@ -40,10 +40,12 @@ def upgrade() -> None:
         AND product_code IS NOT NULL
     """))
 
-    op.create_unique_constraint("uq_customers_customer_code", "customers", ["customer_code"])
-    op.create_unique_constraint("uq_products_product_code", "products", ["product_code"])
+    # Unique indexes are portable across the supported SQLite/PostgreSQL
+    # development/deployment databases and enforce the same invariant.
+    op.create_index("ux_customers_customer_code", "customers", ["customer_code"], unique=True)
+    op.create_index("ux_products_product_code", "products", ["product_code"], unique=True)
 
 
 def downgrade() -> None:
-    op.drop_constraint("uq_products_product_code", "products", type_="unique")
-    op.drop_constraint("uq_customers_customer_code", "customers", type_="unique")
+    op.drop_index("ux_products_product_code", table_name="products")
+    op.drop_index("ux_customers_customer_code", table_name="customers")
