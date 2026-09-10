@@ -10,14 +10,30 @@ import ProductPage from "../features/products/ProductPage.jsx";
 import PaymentPage from "../features/payments/PaymentPage.jsx";
 import WorkOrderPage from "../features/work-orders/WorkOrderPage.jsx";
 
-export default function AppShell() {
+export default function AppShell({ user, onLogout }) {
   const [activePage, setActivePage] = useState("dashboard");
-  return <div className="app-shell"><Sidebar activePage={activePage} onNavigate={setActivePage}/><div className="app-main"><Header/><PageContainer>
-    {activePage === "dashboard" && <><PageHeader title="Dashboard" description="ARTKRILIK ERP V3"/><DashboardPage/></>}
-    {activePage === "sales-order" && <SalesOrderPage onNavigate={setActivePage}/>} 
-    {activePage === "payment" && <PaymentPage/>}
-    {activePage === "customer" && <CustomerPage/>}
-    {activePage === "product" && <ProductPage/>}
-    {activePage === "work-order" && <WorkOrderPage/>}
-  </PageContainer></div></div>;
+
+  return (
+    <div className="app-shell">
+      <Sidebar activePage={activePage} onNavigate={setActivePage} />
+
+      <div className="app-main">
+        <Header user={user} onLogout={onLogout} activePage={activePage} />
+
+        <PageContainer>
+          {activePage === "dashboard" && (
+            <>
+              <PageHeader title="Dashboard" description="ARTKRILIK ERP V3" />
+              <DashboardPage />
+            </>
+          )}
+          {activePage === "sales-order" && <SalesOrderPage onNavigate={setActivePage} />}
+          {activePage === "payment" && <PaymentPage />}
+          {activePage === "customer" && <CustomerPage />}
+          {activePage === "product" && <ProductPage />}
+          {activePage === "work-order" && <WorkOrderPage />}
+        </PageContainer>
+      </div>
+    </div>
+  );
 }
