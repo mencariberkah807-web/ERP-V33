@@ -16,6 +16,7 @@ class Customer(Base):
     data: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    __table_args__ = (UniqueConstraint("customer_code", name="uq_customers_customer_code"),)
 
 
 class Product(Base):
@@ -27,6 +28,7 @@ class Product(Base):
     data: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    __table_args__ = (UniqueConstraint("product_code", name="uq_products_product_code"),)
 
 
 class SalesOrder(Base):
