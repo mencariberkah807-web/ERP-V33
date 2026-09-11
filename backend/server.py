@@ -18,12 +18,14 @@ from database.models import Customer, IdempotencyRecord, Payment, Product, Sales
 from routes.master_data import router as master_data_router
 from routes.payment_commands import router as payment_commands_router
 from routes.sales_order_commands import router as sales_order_commands_router
+from routes.work_order_commands import router as work_order_commands_router
 
 app = FastAPI(title="ARTKRILIK ERP V3.3 API", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 app.include_router(master_data_router)
 app.include_router(payment_commands_router)
 app.include_router(sales_order_commands_router)
+app.include_router(work_order_commands_router)
 ERROR_CODES={400:"BAD_REQUEST",401:"UNAUTHORIZED",403:"FORBIDDEN",404:"NOT_FOUND",409:"CONFLICT",422:"VALIDATION_ERROR",500:"INTERNAL_SERVER_ERROR"}
 def _error_response(status_code,message,details=None): return JSONResponse(status_code=status_code,content={"error":{"code":ERROR_CODES.get(status_code,"API_ERROR"),"message":message,"details":details or {}}})
 @app.exception_handler(HTTPException)
