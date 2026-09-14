@@ -24,7 +24,8 @@ Current baseline:
 - PHASE 05 = COMPLETE
 - PHASE 06 = COMPLETE
 - PHASE 07 = COMPLETE
-- CURRENT PHASE = PHASE 08
+- PHASE 08 = COMPLETE
+- CURRENT PHASE = PHASE 09
 
 ### NON-LOOP RULE
 
@@ -40,7 +41,36 @@ Never reset to an earlier phase unless an explicit Product Owner decision change
 
 A repository scan is never a phase-reset mechanism.
 
-### Approval rule
+------------------------------------------------------------------------
+
+## ANTI-LOOP / ANTI-WASTE WORKFLOW LOCK — CRITICAL
+
+The canonical policy is `docs/WORKFLOW-LOCK-ANTI-LOOP.md`. It is mandatory for all implementation and repository work.
+
+1. One objective per phase/task. Do not reopen completed work without a concrete reason.
+2. Terminal workflow is strictly: **ONE COMMAND → USER OUTPUT → ANALYSIS → ONE NEXT COMMAND**.
+3. Every command must have a specific decision or validation purpose. No exploratory commands without a hypothesis.
+4. Never repeat an unchanged diagnostic. Re-run only when repository state has changed or the previous result was insufficient.
+5. Maximum two retries for the same diagnosis. If the same approach fails twice, change strategy.
+6. Do not transfer unnecessary diagnosis or tool work to the user.
+7. Preserve data before changing Git state: **STATUS → IDENTIFY → DECIDE → RESOLVE → VALIDATE → PUSH**.
+8. Destructive/history-rewriting actions (`git reset --hard`, `git clean`, force push, blind checkout/restore, deleting conflict sides, or skipping rebase commits) require an explicit justified decision. Force-push requires explicit Product Owner approval.
+9. If Git conflict/merge/rebase state blocks safe implementation, repair repository state before changing application code.
+10. Every task must have an exit condition: Git repair = no active conflict; sync = local/origin relationship intentionally aligned; implementation = approved scope complete; validation = relevant build/static/test checks pass.
+11. If diagnosis is blocked, change strategy instead of looping.
+12. Optimize user/tool resource usage: do not make the user execute work the available repository tooling can safely perform.
+
+### REQUIRED WORK FORMAT
+
+Every active implementation step MUST be framed as:
+
+**STATE → GOAL → DECISION → COMMAND/ACTION → EXIT CONDITION**
+
+This format applies even when the task is small. It exists to prevent repeated scanning, redundant commands, accidental scope expansion, and unresolved Git loops.
+
+------------------------------------------------------------------------
+
+## Approval rule
 
 Do not ask for generic approval between phases.
 
@@ -449,8 +479,8 @@ PHASE 04  Database & Backend Architecture               COMPLETE
 PHASE 05  API Contract                                  COMPLETE
 PHASE 06  Frontend Architecture                          COMPLETE
 PHASE 07  UI/UX Design System                            COMPLETE
-PHASE 08  Master Data                                    CURRENT
-PHASE 09  Sales Order
+PHASE 08  Master Data                                    COMPLETE
+PHASE 09  Sales Order                                    CURRENT
 PHASE 10  Payment
 PHASE 11  Work Order & Production
 PHASE 12  Packing / RTS / Handover
