@@ -28,6 +28,13 @@ export default function Sidebar({ activePage, onNavigate }) {
     </button>
   );
 
+  const unavailable = (label, icon) => (
+    <button type="button" className="nav-item nav-item--disabled" disabled aria-disabled="true">
+      <NavIcon type={icon} />
+      <span>{label}</span>
+    </button>
+  );
+
   return (
     <aside className="app-sidebar">
       <div className="sidebar-brand">
@@ -35,7 +42,7 @@ export default function Sidebar({ activePage, onNavigate }) {
         <img className="sidebar-brand-icon" src="/assets/favicon_artwork icon.png" alt="" aria-hidden="true" />
       </div>
 
-      <nav className="sidebar-nav">
+      <nav className="sidebar-nav" aria-label="Main navigation">
         <section className="nav-section">
           <div className="nav-section-title">Workspace</div>
           {item("dashboard", "Dashboard", "dashboard")}
@@ -44,9 +51,13 @@ export default function Sidebar({ activePage, onNavigate }) {
           {item("customer", "Customer", "customer")}
           {item("product", "Product", "product")}
           {item("work-order", "Work Order", "work")}
-          <button type="button" className="nav-item"><NavIcon type="production" /><span>Production</span></button>
-          <button type="button" className="nav-item"><NavIcon type="fulfillment" /><span>Fulfillment</span></button>
-          <button type="button" className="nav-item"><NavIcon type="settings" /><span>Settings</span></button>
+          {unavailable("Production", "production")}
+          {unavailable("Fulfillment", "fulfillment")}
+        </section>
+
+        <section className="nav-section">
+          <div className="nav-section-title">System</div>
+          {unavailable("Settings", "settings")}
         </section>
 
         <section className="nav-section nav-section--future">
