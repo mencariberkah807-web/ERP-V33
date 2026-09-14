@@ -1,1 +1,1 @@
-export const workOrderRepository = {};
+export { apiWorkOrderRepository as workOrderRepository } from "./apiWorkOrderRepository.js";
