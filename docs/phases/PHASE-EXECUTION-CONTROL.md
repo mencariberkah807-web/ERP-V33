@@ -24,6 +24,31 @@ A new session MUST read this control document, read AGENTS.md, determine CURRENT
 
 A repository scan is not a phase-reset mechanism.
 
+## ANTI-LOOP / RESOURCE CONTROL — CRITICAL
+
+The canonical policy is `docs/WORKFLOW-LOCK-ANTI-LOOP.md`. This execution-control document enforces the following minimum rules:
+
+1. One objective per phase/task.
+2. Terminal execution uses **ONE COMMAND → USER OUTPUT → ANALYSIS → ONE NEXT COMMAND**.
+3. Every command/action must have a specific decision, repair, implementation, or validation purpose.
+4. Do not repeat unchanged diagnostics or run exploratory commands without a hypothesis.
+5. Maximum two retries for the same diagnosis; after two failed attempts, change strategy.
+6. Do not move unnecessary diagnostic/tool work to the user when repository tooling can safely perform it.
+7. For Git state changes use **STATUS → IDENTIFY → DECIDE → RESOLVE → VALIDATE → PUSH**.
+8. Destructive or history-rewriting operations require an explicit justified decision; force-push requires explicit Product Owner approval.
+9. If a merge/rebase/conflict state blocks safe implementation, repair Git state before changing application code.
+10. Every active step has an exit condition. Do not advance without satisfying it.
+11. If diagnosis is blocked, change strategy rather than looping.
+12. Optimize user/tool resource usage and avoid redundant work.
+
+### REQUIRED EXECUTION FORMAT
+
+Every active implementation step is framed as:
+
+**STATE → GOAL → DECISION → COMMAND/ACTION → EXIT CONDITION**
+
+This is a control mechanism, not optional formatting.
+
 ## PHASE ADVANCEMENT RULE
 
 `PHASE N → VALIDATE → MARK COMPLETE → PHASE N+1`
