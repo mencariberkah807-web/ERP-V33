@@ -9,6 +9,7 @@ import "./styles/components.css";
 import "./styles/utilities.css";
 import "./styles/erp33-redesign.css";
 import "./styles/erp33-surface.css";
+import "./styles/erp33-components.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
