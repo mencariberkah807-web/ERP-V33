@@ -11,6 +11,19 @@ function formatIDR(value) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(value || 0));
 }
 
+function statusLabel(status) {
+  const labels = {
+    "NEW ORDER": "New Order",
+    "READY PRODUCTION": "Ready WO",
+    "IN PRODUCTION": "In Progress",
+    PACKING: "Packing",
+    RTS: "RTS",
+    COMPLETED: "Completed",
+    INACTIVE: "Inactive",
+  };
+  return labels[status] || status;
+}
+
 export default function SalesOrderPage() {
   const [showNewOrder, setShowNewOrder] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
@@ -56,7 +69,7 @@ export default function SalesOrderPage() {
             <thead><tr><th>SO Number</th><th>Order Type</th><th>Customer</th><th>Deadline</th><th>Status</th><th className="sales-order-number-cell">Total</th></tr></thead>
             <tbody>
               {filteredOrders.length === 0 ? <tr><td colSpan="6" className="sales-order-empty">No Sales Orders found.</td></tr> : filteredOrders.map((order) => (
-                <tr key={order.id} className="sales-order-row" onClick={() => setSelectedOrder(order)}><td><strong>{order.soNumber}</strong></td><td>{order.orderTypeLabel}</td><td>{order.customer?.displayName || order.marketplace?.customer || "—"}</td><td>{order.deadline || "—"}</td><td><span className="sales-order-status-badge">{order.status === "READY PRODUCTION" ? "Ready WO" : order.status}</span></td><td className="sales-order-number-cell">{formatIDR(order.grandTotal)}</td></tr>
+                <tr key={order.id} className="sales-order-row" onClick={() => setSelectedOrder(order)}><td><strong>{order.soNumber}</strong></td><td>{order.orderTypeLabel}</td><td>{order.customer?.displayName || order.marketplace?.customer || "—"}</td><td>{order.deadline || "—"}</td><td><span className="sales-order-status-badge" data-status={order.status}>{statusLabel(order.status)}</span></td><td className="sales-order-number-cell">{formatIDR(order.grandTotal)}</td></tr>
               ))}
             </tbody>
           </table>
