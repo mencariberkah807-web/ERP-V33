@@ -23,7 +23,7 @@ export default function AppShell({ user, onLogout }) {
         <PageContainer>
           {activePage === "dashboard" && (
             <>
-              <PageHeader title="Dashboard" description="ARTKRILIK ERP V3" />
+              <PageHeader title="Dashboard" description="Operational overview" />
               <DashboardPage />
             </>
           )}
