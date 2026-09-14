@@ -1,31 +1,40 @@
 import { salesOrderStore } from "../../state/salesOrderStore.js";
 import { workOrderStore } from "../../state/workOrderStore.js";
+import { apiSalesOrderRepository } from "../../repositories/salesOrders/apiSalesOrderRepository.js";
+import { apiWorkOrderRepository } from "../../repositories/workOrders/apiWorkOrderRepository.js";
 
 const ELIGIBLE_SO_STATUSES = new Set(["NEW ORDER", "READY PRODUCTION"]);
-
-function nextNumber(records) {
-  const numbers = records
-    .map((record) => String(record?.woNumber ?? "").match(/^WO-(\d+)$/))
-    .map((match) => (match ? Number(match[1]) : 0))
-    .filter(Boolean);
-  const next = numbers.length ? Math.max(...numbers) + 1 : 1;
-  return `WO-${String(next).padStart(5, "0")}`;
-}
 
 function syncSalesOrder(orderId, updater) {
   const orders = salesOrderStore.getSalesOrders();
   const existing = orders.find((order) => order.id === orderId);
-  if (!existing) throw new Error("Sales Order tidak ditemukan.");
+  if (!existing) return null;
   const updated = updater(existing);
   salesOrderStore.replaceSalesOrders(orders.map((order) => order.id === orderId ? updated : order));
   return updated;
 }
 
-export function getWorkOrders() {
-  return workOrderStore.getWorkOrders();
+function mergeWorkOrders(records) {
+  workOrderStore.replaceWorkOrders(records);
+  return records;
 }
 
-export function createWorkOrdersForSalesOrder(orderId) {
+async function resolveApiItems(order) {
+  const apiOrder = await apiSalesOrderRepository.getById(order.soNumber);
+  const apiItems = Array.isArray(apiOrder?.items) ? apiOrder.items : [];
+  if (!apiItems.length) throw new Error("Sales Order belum tersedia di API.");
+  return (order.items || []).map((item, index) => {
+    const direct = apiItems.find((candidate) => String(candidate.soItemId) === String(item.soItemId));
+    return direct || apiItems[index];
+  }).filter(Boolean);
+}
+
+export async function getWorkOrders() {
+  const records = await apiWorkOrderRepository.getAll({ active: true });
+  return mergeWorkOrders(records);
+}
+
+export async function createWorkOrdersForSalesOrder(orderId) {
   const orders = salesOrderStore.getSalesOrders();
   const order = orders.find((entry) => entry.id === orderId);
   if (!order) throw new Error("Sales Order tidak ditemukan.");
@@ -34,90 +43,60 @@ export function createWorkOrdersForSalesOrder(orderId) {
   const activeItems = (order.items || []).filter((item) => item.status !== "INACTIVE");
   if (!activeItems.length) throw new Error("Sales Order tidak memiliki Active SO Item.");
 
-  const existing = workOrderStore.getWorkOrders();
-  const activeExisting = existing.filter((wo) => wo.soNumber === order.soNumber && wo.status !== "INACTIVE");
+  const existing = await apiWorkOrderRepository.getAll({ soNumber: order.soNumber, active: true });
+  const apiItems = await resolveApiItems(order);
   const created = [];
 
-  for (const item of activeItems) {
-    if (activeExisting.some((wo) => wo.soItemId === item.soItemId)) continue;
-    const now = new Date().toISOString();
-    const wo = {
-      id: crypto.randomUUID?.() ?? `wo-${Date.now()}-${item.soItemId}`,
-      woNumber: nextNumber([...existing, ...created]),
-      soNumber: order.soNumber,
-      soItemId: item.soItemId,
-      customer: order.customer,
-      marketplace: order.marketplace,
-      orderDate: order.orderDate,
-      deadline: order.deadline,
-      priority: order.priority,
-      productId: item.productId,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-      discount: item.discount,
-      artwork: item.artwork,
-      specification: item.specification ?? "",
-      productionNotes: item.productionNotes ?? "",
-      customRequest: Boolean(item.customRequest),
-      process: {
-        laserCutting: "PENDING",
-        uvPrinting: "PENDING",
-        assembly: "PENDING",
-        laserMarking: "PENDING",
-        finishing: "PENDING",
-      },
-      status: "READY",
-      timeline: [{ status: "READY", at: now, actor: "system" }],
-      createdAt: now,
-      updatedAt: now,
-    };
-    created.push(wo);
+  for (let index = 0; index < activeItems.length; index += 1) {
+    const item = activeItems[index];
+    if (existing.some((wo) => String(wo.soItemId) === String(item.soItemId))) continue;
+    const apiItem = apiItems[index];
+    if (!apiItem?.soItemId) throw new Error(`SO Item ${item.soItemId} belum memiliki ID API.`);
+    created.push(await apiWorkOrderRepository.createForSalesOrder(order.soNumber, apiItem.soItemId));
   }
 
   if (!created.length) throw new Error("Active SO Item sudah memiliki Active WO.");
-  workOrderStore.replaceWorkOrders([...existing, ...created]);
+  const refreshed = await apiWorkOrderRepository.getAll({ soNumber: order.soNumber, active: true });
+  mergeWorkOrders(refreshed);
   syncSalesOrder(orderId, (current) => ({ ...current, status: "READY PRODUCTION", updatedAt: new Date().toISOString() }));
   return created;
 }
 
-function transition(woId, nextStatus) {
+export async function startWorkOrder(woId) {
   const records = workOrderStore.getWorkOrders();
-  const existing = records.find((wo) => wo.id === woId);
+  const existing = records.find((wo) => String(wo.id) === String(woId));
   if (!existing) throw new Error("Work Order tidak ditemukan.");
-  if (existing.status === "INACTIVE") throw new Error("Work Order INACTIVE tidak dapat diproses.");
-  const allowed = { READY: ["IN PRODUCTION"], "IN PRODUCTION": ["COMPLETED PRODUCTION"], "COMPLETED PRODUCTION": [] };
-  if (!allowed[existing.status]?.includes(nextStatus)) throw new Error(`Transisi WO ${existing.status} → ${nextStatus} tidak diizinkan.`);
+  if (existing.status !== "READY") throw new Error(`Transisi WO ${existing.status} → IN PRODUCTION tidak diizinkan.`);
+  const updated = await apiWorkOrderRepository.start(existing.woNumber);
+  const next = records.map((wo) => String(wo.id) === String(woId) ? updated : wo);
+  mergeWorkOrders(next);
+  const orders = salesOrderStore.getSalesOrders();
+  const so = orders.find((order) => order.soNumber === existing.soNumber);
+  if (so) syncSalesOrder(so.id, (current) => ({ ...current, status: "IN PRODUCTION", updatedAt: new Date().toISOString() }));
+  return updated;
+}
 
-  const now = new Date().toISOString();
-  const updated = { ...existing, status: nextStatus, timeline: [...(existing.timeline || []), { status: nextStatus, at: now, actor: "production" }], updatedAt: now };
-  workOrderStore.replaceWorkOrders(records.map((wo) => wo.id === woId ? updated : wo));
-
-  const allForSO = workOrderStore.getWorkOrders().filter((wo) => wo.soNumber === existing.soNumber && wo.status !== "INACTIVE");
-  const soOrders = salesOrderStore.getSalesOrders();
-  const so = soOrders.find((order) => order.soNumber === existing.soNumber);
-  if (nextStatus === "IN PRODUCTION") {
-    if (so) syncSalesOrder(so.id, (current) => ({ ...current, status: "IN PRODUCTION", updatedAt: now }));
-  }
-  if (nextStatus === "COMPLETED PRODUCTION" && allForSO.length && allForSO.every((wo) => wo.status === "COMPLETED PRODUCTION")) {
-    if (so) syncSalesOrder(so.id, (current) => ({ ...current, status: "PACKING", updatedAt: now }));
+export async function completeWorkOrder(woId) {
+  const records = workOrderStore.getWorkOrders();
+  const existing = records.find((wo) => String(wo.id) === String(woId));
+  if (!existing) throw new Error("Work Order tidak ditemukan.");
+  if (existing.status !== "IN PRODUCTION") throw new Error(`Transisi WO ${existing.status} → COMPLETED PRODUCTION tidak diizinkan.`);
+  const updated = await apiWorkOrderRepository.complete(existing.woNumber);
+  const refreshed = await apiWorkOrderRepository.getAll({ soNumber: existing.soNumber, active: true });
+  mergeWorkOrders(refreshed);
+  if (updated.status === "COMPLETED PRODUCTION" && refreshed.length && refreshed.every((wo) => wo.status === "COMPLETED PRODUCTION")) {
+    const orders = salesOrderStore.getSalesOrders();
+    const so = orders.find((order) => order.soNumber === existing.soNumber);
+    if (so) syncSalesOrder(so.id, (current) => ({ ...current, status: "PACKING", updatedAt: new Date().toISOString() }));
   }
   return updated;
 }
 
-export function startWorkOrder(woId) {
-  return transition(woId, "IN PRODUCTION");
-}
-
-export function completeWorkOrder(woId) {
-  return transition(woId, "COMPLETED PRODUCTION");
-}
-
-export function cancelWorkOrder(woId) {
+export async function cancelWorkOrder(woId) {
   const records = workOrderStore.getWorkOrders();
-  const existing = records.find((wo) => wo.id === woId);
+  const existing = records.find((wo) => String(wo.id) === String(woId));
   if (!existing) throw new Error("Work Order tidak ditemukan.");
-  const now = new Date().toISOString();
-  const updated = { ...existing, status: "INACTIVE", timeline: [...(existing.timeline || []), { status: "INACTIVE", at: now, actor: "admin" }], updatedAt: now };
-  workOrderStore.replaceWorkOrders(records.map((wo) => wo.id === woId ? updated : wo));
+  const updated = await apiWorkOrderRepository.cancel(existing.woNumber);
+  mergeWorkOrders(records.map((wo) => String(wo.id) === String(woId) ? updated : wo));
   return updated;
 }
