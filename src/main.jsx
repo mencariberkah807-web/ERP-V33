@@ -7,6 +7,7 @@ import "./styles/tokens.css";
 import "./styles/globals.css";
 import "./styles/components.css";
 import "./styles/utilities.css";
+import "./styles/erp33-redesign.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
